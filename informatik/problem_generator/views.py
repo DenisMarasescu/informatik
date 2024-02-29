@@ -158,7 +158,12 @@ def my_courses(request):
 
     attending_courses = request.user.enrolled_courses.all()
 
-    return render(request, 'problem_generator/my_courses.html', {'courses': courses_taught, 'attending_courses': attending_courses,})
+    profesor = False
+
+    if request.user.is_profesor:
+        profesor = True
+
+    return render(request, 'problem_generator/my_courses.html', {'courses': courses_taught, 'attending_courses': attending_courses, "profesor": profesor})
 
 
 def generate_homework(request, course_id):
@@ -228,7 +233,7 @@ def generate_homework(request, course_id):
             print("\n\n\n\n\n\n", nOq, "\n\n\n\n")
             deadline = test_form.cleaned_data['deadline']
 
-            system_prompt = "You are a creative, romanian speaking, informatics problem generator that creates multiple problems with quiz-like answers in the following format: Question 1: What is X? </s>A. Option1 </s>B. Option2 </s>C. Option3 </s>**Correct: A. You task is to generate a specified number of such problems. The questions can be from simple theory questions to provided code separated from the question by ```(before and after it) with provided input and you will have to tell the correct output. Every qustion has to start with '#### Question'"
+            system_prompt = "You are a creative, romanian speaking, informatics problem generator that creates multiple problems with quiz-like answers in the following format: Question 1: What is X? </s>A. Option1 </s>B. Option2 </s>C. Option3 </s>**Correct: A. You task is to generate a specified number of such problems. The questions can be from simple theory questions to provided code separated from the question by ```(before and after it) with provided input and you will have to tell the correct output. Every qustion has to start with '#### Question'. The output has to be in romanian."
             
             user_prompt = f"Generate a set of {nOq} quiz subjects with incrementing difficulty based on the topics: {topics}"
             
@@ -338,7 +343,7 @@ def problem_detail(request, problem_id):
             solution.feedback = feedback
             
             solution.save()
-            return redirect('some_success_url')  # Adjust the redirect as needed
+            return redirect(request.path)  # Adjust the redirect as needed
     else:
         form = SolutionForm()
     return render(request, 'problem_generator/problem_detail.html', {'problem': problem, 'form': form, 'latest_solution': latest_solution,})

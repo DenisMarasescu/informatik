@@ -12,36 +12,43 @@
         <form method="post">
             {% csrf_token %}
             <div class="form-group">
-                <label for="num_problems">Number of Problems:</label>
+                <label for="num_problems">Numar de probleme:</label>
                 {{ form.num_problems }}
             </div>
             <div class="form-group">
-                <label for="min_difficulty">Minimum Difficulty:</label>
+                <label for="min_difficulty">Dificultate Minima:</label>
                 {{ form.min_difficulty }}
             </div>
             <div class="form-group">
-                <label for="max_difficulty">Maximum Difficulty:</label>
+                <label for="max_difficulty">Dificultate Maxima:</label>
                 {{ form.max_difficulty }}
             </div>
             <div class="form-group">
-                <label for="themes">Themes:</label>
+                <label for="themes">Teme:</label>
                 {{ form.themes }}
             </div>
             <div class="form-group">
-                <label for="deadline">Deadline:</label>
+                <label for="deadline">Termen Limita:</label>
                 {{ form.deadline }}
             </div>
-            <button type="submit" name="submit_homework" class="btn btn-primary">Generate Homework</button>
+            <button type="submit" name="submit_homework" class="btn btn-primary">Genereaza tema</button>
         </form>
     </div>
     <div class="flexx half box">
-        <h2>Create Test for {{ course.name }}</h2>
+        <h2>Creaza un test pentru {{ course.name }}</h2>
         <form method="post">
             {% csrf_token %}
             {{ test_form.as_p }}
-            <button type="submit" name="submit_test" class="btn btn-primary">Generate Test</button>
+            <button type="submit" name="submit_test" class="btn btn-primary">Genereaza testul</button>
         </form>
     </div>
+
+    <script>
+        document.querySelector('form').addEventListener('submit', function() {
+            document.getElementById('loadingOverlay').style.display = 'flex'; // Show the overlay
+            mojsAnimation.replay(); // Start or restart the animation
+        });
+    </script>
 </div>
 
 {% endblock content %}
@@ -55,16 +62,16 @@
     <title>Creeaza tema</title>
 </head>
 <body>
-    <h2>Create Homework for {{ course.name }}</h2>
+    <h2>Creaza Tema pentru {{ course.name }}</h2>
 
     <form method="post">
         {% csrf_token %}
         <div class="form-group">
-            <label for="num_problems">Number of Problems:</label>
+            <label for="num_problems">Numar probleme:</label>
             {{ form.num_problems }}
         </div>
         <div class="form-group">
-            <label for="min_difficulty">Minimum Difficulty:</label>
+            <label for="min_difficulty">:</label>
             {{ form.min_difficulty }}
         </div>
         <div class="form-group">

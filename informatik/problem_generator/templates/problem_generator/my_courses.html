@@ -37,6 +37,13 @@
     <div class="underline"></div>
     <a href="{%url 'enroll_in_course'%}" class="btn">Apasa aici!</a>
 </div>
+{%if profesor%}
+    <div class="box">
+        <h1>Vrei sa iti creezi propria clasa?</h1>
+        <div class="underline"></div>
+        <a href="{%url 'create_course'%}" class="btn">Apasa aici!</a>
+    </div>
+{%endif%}
 {% endblock content %}
 
 <!DOCTYPE html>

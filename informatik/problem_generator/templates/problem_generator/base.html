@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Your Site Title{% endblock %}</title>
     <link rel="stylesheet" href="{%static 'problem_generator/css/style.css'%}">
+    <script src="https://cdn.jsdelivr.net/npm/@mojs/core"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
@@ -71,6 +72,9 @@
 
 </head>
 <body>
+    <div id="loadingOverlay" style="display: none;">
+        <div id="mojsAnimation"></div>
+    </div>
     <div class="flexx fullV">
         <div class="sidebar">
             <h1 id="logo">Evalu<span class="colorBlue">AI</span></h1>

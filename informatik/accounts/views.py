@@ -17,7 +17,7 @@ def register(request):
                 user.school = form.cleaned_data.get('school', None)
             user.save()
             # Log the user in, redirect, or return a success response
-            return redirect('home')  # Adjust as necessary
+            return redirect('/accounts/login')  # Adjust as necessary
     else:
         form = BaseRegisterForm()  # Default to student registration form
     return render(request, 'accounts/register.html', {'form': form})
@@ -37,7 +37,7 @@ def user_login(request):
             if user is not None:
                 login(request, user)
                 # Redirect to a success page.
-                return redirect("/problems/my_courses")  # Adjust the redirect as necessary
+                return redirect("/my_courses")  # Adjust the redirect as necessary
             else:
                 # Return an 'invalid login' error message.
                 form.add_error(None, "Invalid username or password.")
