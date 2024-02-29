@@ -1,0 +1,99 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Your Site Title{% endblock %}</title>
+    <link rel="stylesheet" href="{%static 'problem_generator/css/style.css'%}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+    <script>
+    function addDarkmodeWidget() {
+        const options = {
+            bottom: '64px', // position of the widget
+            right: '3rem',
+            left: 'unset',
+            time: '0.5s', // transition time
+            mixColor: '#fff', // default color
+            backgroundColor: '#fff',  
+            buttonColorDark: '#100f2c',  
+            buttonColorLight: '#fff',
+            saveInCookies: true, // whether to save the theme in cookies
+            label: '🌓', // label for the toggle button
+            autoMatchOsTheme: true // automatically match OS theme
+        };
+
+        const darkmode = new Darkmode(options);
+        darkmode.showWidget();
+
+        // Increase z-index after widget is shown
+        document.addEventListener("DOMContentLoaded", function() {
+            var widget = document.querySelector('.darkmode-toggle');
+            if (widget) {
+                widget.style.zIndex = '9999'; // Ensure it's above other elements
+            }
+        });
+    }
+    window.addEventListener('load', addDarkmodeWidget);
+
+
+    function updateSvgIcons() {
+    var isDarkMode = document.body.classList.contains('dark-mode');
+    var icons = document.querySelectorAll('.nav-icon'); // Assign a common class 'nav-icon' to your img elements.
+
+    icons.forEach(function(icon) {
+      var src = icon.getAttribute('src');
+      if (isDarkMode) {
+        icon.setAttribute('src', src.replace('.svg', '_alb.svg'));
+      } else {
+        icon.setAttribute('src', src.replace('_alb.svg', '.svg'));
+      }
+    });
+  }
+
+  // Assuming darkmode.js toggles a class on the body
+  var observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.attributeName === "class") {
+        updateSvgIcons();
+      }
+    });
+  });
+
+  observer.observe(document.body, { attributes: true });
+
+  // Call the function initially if dark mode is default
+  updateSvgIcons();
+
+    </script>
+
+</head>
+<body>
+    <div class="flexx fullV">
+        <div class="sidebar">
+            <h1 id="logo">Evalu<span class="colorBlue">AI</span></h1>
+            <nav>
+                <a href="{%url 'my_courses'%}" class="{% if active_section == 'class' %}active{% endif %}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="23.559" viewBox="0 0 24 23.559">
+                    <g id="noun-home-6433807" transform="translate(-1.588 -1.69)">
+                      <path id="Path_2901" data-name="Path 2901" d="M13.588,1.69a1.838,1.838,0,0,0-1.232.47L2.627,10.916a3.14,3.14,0,0,0-1.039,2.333V23.534A1.723,1.723,0,0,0,3.3,25.249H23.873a1.723,1.723,0,0,0,1.714-1.714V13.249a3.14,3.14,0,0,0-1.039-2.333L14.82,2.159A1.838,1.838,0,0,0,13.588,1.69Zm0,1.138a.7.7,0,0,1,.468.182l9.729,8.757a1.993,1.993,0,0,1,.661,1.482V23.534a.563.563,0,0,1-.571.571H17.159V16.677a1.723,1.723,0,0,0-1.714-1.714H11.73a1.723,1.723,0,0,0-1.714,1.714v7.429H3.3a.563.563,0,0,1-.571-.571V13.249a1.993,1.993,0,0,1,.661-1.482L13.12,3.01A.7.7,0,0,1,13.588,2.828ZM11.73,16.106h3.714a.563.563,0,0,1,.571.571v7.429H11.159V16.677A.563.563,0,0,1,11.73,16.106Z" transform="translate(0 0)" fill="#000634"/>
+                    </g>
+                  </svg>Clase</a>
+                <a href="{%url 'generate_problem'%}" class="{% if active_section == 'problems' %}active{% endif %}"><img src="{%static 'problem_generator/assets/settings.svg'%}" alt="">Probleme</a>
+                <!-- <a href="" class="{% if active_section == 'social' %}active{% endif %}"><img src="{%static 'problem_generator/assets/social_alb.svg'%}" alt="">Social</a> -->
+            </nav>
+        </div>
+        <div class="postSide">
+            <div class="topbar">
+                <h2>{{page_title}}</h2>
+            </div>
+            <div class="container">
+                {% block content %}
+                
+                {% endblock content %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,125 @@
+{% extends "problem_generator/base.html" %}
+{% load custom_filters %}
+{%load static%}
+
+
+{% block content %}
+
+    <div class="box">
+        <h1>Homework: {{ homework.title }}</h1>
+        <p>Deadline: {{ homework.deadline }}</p>
+        <div class="underline"></div>
+        <h2>Problems:</h2>
+        <ul>
+            {% for problem in homework.probleme.all %}
+            <li>
+                <!-- {{ problem.text }} -->
+                <a href="{% url 'problem_detail' problem.id %}">Problem {{ forloop.counter }}</a>: {{ problem.text|truncatewords:10 }}
+                {% if is_profesor %}
+                    <h3>Solutions for this problem:</h3>
+                    <ul>
+                        {% for solution in problem.solutions.all %}
+                        <li>{{ solution.student.username }}: Grade - {{ solution.grade }}</li>
+                        {% empty %}
+                        <li>No solutions submitted yet.</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </li>
+            {% empty %}
+            <li>No problems have been added yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+{% endblock content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homework Details</title>
+</head>
+<body>
+    
+    <h1>Homework: {{ homework.title }}</h1>
+    <p>{{ homework.description }}</p>
+    <p>Deadline: {{ homework.deadline }}</p>
+
+    <h2>Problems:</h2>
+    <ul>
+        {% for problem in homework.probleme.all %}
+        <li>
+            {{ problem.text }}
+            <a href="{% url 'problem_detail' problem.id %}">Problem {{ forloop.counter }}</a>: {{ problem.text|truncatewords:10 }}
+            {% if is_profesor %}
+                <h3>Solutions for this problem:</h3>
+                <ul>
+                    {% for solution in problem.solutions.all %}
+                    <li>{{ solution.student.username }}: Grade - {{ solution.grade }}</li>
+                    {% empty %}
+                    <li>No solutions submitted yet.</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </li>
+        {% empty %}
+        <li>No problems have been added yet.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Multiple Choice Questions:</h2>
+    <form method="post" action="{% url 'submit_homework' homework.id %}">
+        {% csrf_token %}
+        {% for mc_problem in homework.multiple_choice_problems.all %}
+        <div>
+            <fieldset>
+                <legend>{{ mc_problem.question }}</legend>
+                {% for choice in mc_problem.choices %}
+                    <label>
+                        <!-- Extract the letter and text for the choice -->
+                        <input type="radio" name="question_{{ mc_problem.id }}" value="{{ choice|slice:':1' }}">
+                        {{ choice|slice:'3:' }}
+                    </label><br>
+                {% endfor %}
+            </fieldset>
+        </div>
+        {% empty %}
+        <p>No multiple choice questions have been added yet.</p>
+        {% endfor %}
+        <input type="submit" value="Submit Answers">
+    </form>
+    {% if user.is_profesor %}
+    <h2>Submitted Solutions and Grades</h2>
+    {% if mcq_results %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Correct Answers</th>
+                    <th>Total Questions</th>
+                    <th>Grade</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if is_teacher %}
+                    <h3>Student Submissions:</h3>
+                    <ul>
+                    {% for submission in submissions %}
+                        <li>
+                            {{ submission.student.username }}: {{ submission.correct_answers }}/{{ submission.total_questions }} correct answers. Grade: {{ submission.grade }}%
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No solutions have been submitted yet.</p>
+    {% endif %}
+{% endif %}
+
+
+</body>
+</html>

@@ -1,0 +1,155 @@
+{% extends "problem_generator/base.html" %}
+{% load custom_filters %}
+{%load static%}
+
+
+{% block content %}
+    
+
+    
+
+    <div class="flexx col full">
+        <div class="box">
+            <h1>{{ course.name }}</h1>
+            <div class="underline"></div>
+            <p class="colorGray">Descriere: {{ course.description }}</p>
+            <div class="course-entrance-code">
+                <p class="colorBlue"><strong class="colorGray">Entrance Code:</strong> {{ course.entrance_code }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="flexx gap">
+    <div class="flexx col half">
+    <div class="box">
+        <h2>Profesori</h2>
+        <div class="underline"></div>
+        <ul>
+            {% for teacher in course.teachers.all %}
+                <li>
+                    <div class="profileImage"></div>
+                    {% if teacher == request.user %}
+                    <span class="colorBlue">Tu</span>
+                    {% else %}
+                        {{ teacher.first_name }} {{ teacher.last_name }}
+                    {%endif%}
+                    </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="box">
+    <h2>Elevi</h2>
+    <div class="underline"></div>
+        <ul>
+            {% for student in course.students.all %}
+                <li>
+                    <div class="profileImage"></div>
+                    {% if student == request.user %}
+                        <span class="colorBlue">Tu</span>
+                    {% else %}
+                        {{ student.username }} ({{ student.first_name }} {{ student.last_name }})
+                    {% endif %}
+
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<div class="flexx col half">
+    
+    <div class="box">
+        <h2>Teme</h2>
+        <div class="underline"></div>
+        
+        {% for homework in homeworks %}
+            <div class="tema">
+                <h2>
+                    <a href="{% url 'homework_detail' homework.id %}">{{ homework.title }}</a>
+                </h2>
+                <!-- <p>{{ homework.description }}</p> -->
+                <p>Deadline: {{ homework.deadline }}</p>
+            </div>
+        {% endfor %}
+        <div class="underline"></div>
+        {% if request.user in course.teachers.all %}
+            <!-- Button to Create Homework for this course -->
+            <a href="{% url 'create_homework' course_id=course.id %}" class="btn btn-primary">Adauga o tema</a>
+        {% endif %}
+    </div>
+</div>
+</div>
+
+{% endblock content %}
+
+    <!-- {% for homework in homeworks %}
+        <div>
+            <h2>
+                <a href="{% url 'homework_detail' homework.id %}">{{ homework.title }}</a>
+            </h2>
+            <p>{{ homework.description }}</p>
+            <p>Deadline: {{ homework.deadline }}</p>
+        </div>
+    {% endfor %}
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clasa</title>
+</head>
+<body>
+    
+    <h1>{{ course.name }}</h1>
+    <p>{{ course.description }}</p>
+    <div class="course-entrance-code">
+        <strong>Entrance Code:</strong> {{ course.entrance_code }}
+    </div>
+
+    {% if request.user in course.teachers.all %}
+        <!-- Button to Create Homework for this course -->
+        <a href="{% url 'create_homework' course_id=course.id %}" class="btn btn-primary">Create Homework</a>
+    {% endif %}
+
+    <h2>Teacher(s)</h2>
+<ul>
+    {% for teacher in course.teachers.all %}
+        <li>
+            {% if teacher == request.user %}
+                You
+            {% else %}
+                {{ teacher.username }} ({{ teacher.first_name }} {{ teacher.last_name }})
+            {% endif %}
+        </li>
+    {% endfor %}
+</ul>
+
+<h2>Students</h2>
+<ul>
+    {% for student in course.students.all %}
+        <li>
+            {% if student == request.user %}
+                You
+            {% else %}
+                {{ student.username }} ({{ student.first_name }} {{ student.last_name }})
+            {% endif %}
+        </li>
+    {% endfor %}
+</ul>
+
+
+    {% for homework in homeworks %}
+        <div>
+            <h2>
+                <a href="{% url 'homework_detail' homework.id %}">{{ homework.title }}</a>
+            </h2>
+            <p>{{ homework.description }}</p>
+            <p>Deadline: {{ homework.deadline }}</p>
+        </div>
+    {% endfor %}
+
+</body>
+</html>
+

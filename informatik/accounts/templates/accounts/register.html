@@ -1,0 +1,80 @@
+
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inregistrare</title>
+    <link rel="stylesheet" href="{%static 'problem_generator/css/style.css'%}">
+</head>
+<body>
+    <div class="flexx col center fullV">
+        <form method="post" class="loginForm reg">
+            <h1 id="logo">Evalu<span class="colorBlue">AI</span></h1>
+            {% csrf_token %}
+            <div class="flexx col gap">
+                <div class="flexx col full">
+                    <label for="{{ form.username.id_for_label }}">Username:</label>
+                    {{ form.username }}
+                </div>
+                
+                <div class="flexx col full">
+                    <label for="{{ form.email.id_for_label }}">Email:</label>
+                    {{ form.email }}
+                </div>
+                
+                <!-- Repeat for each field -->
+                <div class="flexx gap">
+                    <div class="flexx col half">
+                        <label for="{{ form.first_name.id_for_label }}">Prenume:</label>
+                        {{ form.first_name }}
+                    </div>
+
+                    <div class="flexx col half">
+                        <label for="{{ form.last_name.id_for_label }}">Nume:</label>
+                        {{ form.last_name }}
+                    </div>
+                </div>
+
+                <div class="flexx col full">
+                    <label for="{{ form.password1.id_for_label }}">Password:</label>
+                    {{ form.password1 }}
+                </div>
+                
+                <div class="flexx col full">
+                    <label for="{{ form.password2.id_for_label }}">Password confirmation:</label>
+                    {{ form.password2 }}
+                </div>
+                
+                <div class="flexx">
+                    <label for="id_is_profesor">Register as a professor:</label>
+                    <input type="checkbox" name="is_profesor" id="id_is_profesor" />
+                </div>
+
+                <div id="profesorFields" style="display:none;">
+                    <label for="id_school">School:</label>
+                    <input type="text" name="school" id="id_school" />
+                </div>
+            
+                <button type="submit" class="btn">Register</button>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const isProfessorCheckbox = document.getElementById('id_is_profesor');
+        const professorFields = document.getElementById('profesorFields');
+    
+        function toggleProfessorFields() {
+            professorFields.style.display = isProfessorCheckbox.checked ? 'block' : 'none';
+        }
+    
+        toggleProfessorFields(); // Call this function initially to set the correct display
+    
+        isProfessorCheckbox.addEventListener('change', toggleProfessorFields);
+    });
+    </script>      
+</body>
+</html>

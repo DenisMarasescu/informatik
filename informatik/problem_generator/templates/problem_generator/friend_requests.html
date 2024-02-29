@@ -1,0 +1,18 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friend requests</title>
+</head>
+<body>
+    <ul>
+        {% for request in requests %}
+        <li>
+            {{ request.sender.username }} wants to be friends - <a href="{% url 'accept_friend_request' request.id %}">Accept</a>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

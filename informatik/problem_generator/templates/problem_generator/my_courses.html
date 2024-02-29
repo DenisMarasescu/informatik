@@ -1,0 +1,71 @@
+{% extends "problem_generator/base.html" %}
+{% load custom_filters %}
+{%load static%}
+
+
+{% block content %}
+<div class="flexx gap">
+    <div class="flexx col half box">
+        <h1 class="textMare">Cursuri unde esti profesor</h1>
+        <div class="underline"></div>
+        {% for course in courses %}
+            <div class="flexx full">
+                <div class="box notCol align clasa spacebet">
+                    <h1>{{course.name}}</h1>
+                    <a href="{% url 'course_detail' course.id %}" class="btn">Acceseaza</a>
+                </div>
+            </div>
+        {% empty %}
+        <h1>Nu predai la nici o clasa</h1>
+        {% endfor %}
+    </div>
+    <div class="flexx col half box">
+        <h1 class="textMare">Cursuri</h1>
+        <div class="underline"></div>
+        {% for course in attending_courses %}
+            <div class="flexx full">
+                <div class="box notCol align clasa spacebet">
+                    <h1>{{course.name}}</h1>
+                    <a href="{% url 'course_detail' course.id %}" class="btn">Acceseaza</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+<div class="box">
+    <h1>Vrei sa intri intr-o clasa?</h1>
+    <div class="underline"></div>
+    <a href="{%url 'enroll_in_course'%}" class="btn">Apasa aici!</a>
+</div>
+{% endblock content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h2>Teaching Courses</h2>
+    <ul>
+        {% for course in courses %}
+        <li>
+            <a href="{% url 'course_detail' course.id %}">{{ course.name }}</a>
+            - {{ course.description }}
+        </li>
+        {% empty %}
+        <li>Nu predai la nici o clasa</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Attending Courses</h2>
+    <ul>
+    {% for course in attending_courses %}
+        <li>{{ course.name }} - <a href="{% url 'course_detail' course.id %}">View</a></li>
+    {% empty %}
+        <li>No attending courses.</li>
+    {% endfor %}
+    </ul>
+</body>
+</html>

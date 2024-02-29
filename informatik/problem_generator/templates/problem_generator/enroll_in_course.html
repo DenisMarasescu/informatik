@@ -1,0 +1,37 @@
+{% extends "problem_generator/base.html" %}
+{% load custom_filters %}
+{%load static%}
+
+
+{% block content %}
+
+<div class="box">
+    <form method="post">
+        {% csrf_token %}
+        <label for="entrance_code">Entrance Code:</label>
+        <input type="text" name="entrance_code" required>
+        <button type="submit" class="btn">Enroll</button>
+    </form>
+</div>
+
+{% endblock content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enroll</title>
+</head>
+<body>
+    <form method="post">
+        {% csrf_token %}
+        <label for="entrance_code">Entrance Code:</label>
+        <input type="text" name="entrance_code" required>
+        <button type="submit">Enroll</button>
+    </form>
+    
+    {% if error %}
+        <p>{{ error }}</p>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,154 @@
+{% extends "problem_generator/base.html" %}
+{% load custom_filters %}
+{%load static%}
+
+
+{% block content %}
+
+<div class="box">
+    <!-- <h1>Enunt</h1> -->
+    {% parse_problem_text problem.text as sections %}
+
+    <!-- <div class="enunt">{{ problem.text }}</div> -->
+
+    <!-- <pre>{{ sections|safe }}</pre> -->
+
+    <div class="problem">
+        <h1>{{ sections.Titlu }}</h1>
+        <div class="underline"></div>
+        <div class="flexx col enunt">
+            <h2>Enunț:</h2>
+            <div class="underline"></div>
+            <p>{{ sections.Enunt }}</p>
+        </div>
+        <div class="flexx col enunt">
+            <h2>Cerință</h2>
+            <div class="underline"></div>
+            <p>{{ sections.Cerinta }}</p>
+        </div>
+        <div class="flexx gap">
+            <div class="flexx col half enunt">
+                <h2>Input</h2>
+                <div class="underline"></div>
+                <p> {{ sections.Input }}</p>
+            </div>
+            <div class="flexx col half enunt">
+                <h2>Output</h2>
+                <div class="underline"></div>
+                <p>{{ sections.Output }}</p>
+            </div>
+        </div>
+        <div class="flexx col enunt">
+            <h2>Restricții</h2>
+            <div class="underline"></div>
+            <p> {{ sections.Restrictii }}</p>
+        </div>
+        <div class="flexx col enunt">
+            <h2>Explicatie exemplu</h2>
+            <div class="underline"></div>
+            <p>{{ sections.Explicatie_exemplu }}</p>
+        </div>
+    </div>
+    <div class="underline"></div>
+
+    {% if user.is_authenticated %}
+        <!-- <h2>Submit your solution</h2> -->
+        <form method="post" class="solutionForm flexx col">
+            {% csrf_token %}
+            <h2><label for="{{ form.text.id_for_label }}" class="">Introdu codul</label></h2>
+            <div id="editor" style="height: 400px; width: 100%;">function hello() { console.log("Hello, world!"); }</div>
+            <script>
+                var editor = ace.edit("editor");
+                editor.setTheme("ace/theme/monokai");
+                
+                function setModeFromContent(content) {
+                    // Check if content is empty or highlight.js is not defined
+                    if (!content || typeof hljs === 'undefined') {
+                        console.error("Content is empty or Highlight.js is not loaded.");
+                        return;
+                    }
+
+                    var detectedLanguage = hljs.highlightAuto(content).language;
+                    // Log the detected language for debugging
+                    // console.log("Detected language:", detectedLanguage);
+
+                    // Check if the detected language is supported by your mapping
+                    var mode = "ace/mode/" + (detectedLanguage || "plain_text"); // Default to plain_text mode if language is undefined
+                    // console.log("Setting mode to:", mode);
+
+                    try {
+                        editor.session.setMode(mode);
+                    } catch (e) {
+                        // Log error if setting the mode fails
+                        // console.error("Failed to set mode:", e);
+                        // Optionally, set to a default mode
+                        editor.session.setMode("ace/mode/plain_text");
+                    }
+                }
+
+                // Set mode on initial content
+                setModeFromContent(editor.getValue());
+
+                // Update mode on content change
+                editor.session.on('change', function() {
+                    var content = editor.getValue();
+                    setModeFromContent(content);
+                });
+
+                document.querySelector('form').addEventListener('submit', function() {
+                    document.getElementById('code').value = editor.getValue();
+                });
+
+                </script>
+                <textarea name="text" id="code" style="display: none;"></textarea>
+            <button type="submit" class="btn">Submit Solution</button>
+        </form>
+    {% else %}
+        <p>You must be logged in to submit a solution.</p>
+    {% endif %}
+    {% if latest_solution %}
+        <div class="solution-feedback">
+            <div class="enunt">
+                <h1>Nota: {{latest_solution.grade}} puncte</h1>
+            </div>
+
+            <h3>Sfaturi in functie de ultima solutie</h3>
+            <div class="flexx col enunt">
+                {% for tip in latest_solution.feedback|split_tips %}
+                    <div class="tip">
+                        <p>{{ tip }}</p>
+                    </div>
+                    <div class="underline"></div>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <p>You have not submitted a solution to this problem yet.</p>
+    {% endif %}
+</div>
+
+{% endblock content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problema</title>
+</head>
+<body>
+    <h1>Problem Detail</h1>
+    <div>{{ problem.text }}</div>
+
+    {% if user.is_authenticated %}
+        <h2>Submit your solution</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Submit Solution</button>
+        </form>
+    {% else %}
+        <p>You must be logged in to submit a solution.</p>
+    {% endif %}
+</body>
+</html>

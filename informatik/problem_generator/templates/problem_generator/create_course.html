@@ -1,0 +1,35 @@
+{% extends "problem_generator/base.html" %}
+{% load custom_filters %}
+{%load static%}
+
+
+{% block content %}
+
+    <div class="box">
+        <h2>Creeaza o clasa noua</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Creeaza Clasa</button>
+        </form>
+
+    </div>
+
+{% endblock content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creeaza curs</title>
+</head>
+<body>
+    <h2>Create New Course</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Create Course</button>
+    </form>
+
+</body>
+</html>

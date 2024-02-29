@@ -1,0 +1,93 @@
+{% extends "problem_generator/base.html" %}
+{% load custom_filters %}
+{%load static%}
+
+
+{% block content %}
+
+<div class="flexx gap">
+    <div class="flexx half box">
+        <h2>Create Homework for {{ course.name }}</h2>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="num_problems">Number of Problems:</label>
+                {{ form.num_problems }}
+            </div>
+            <div class="form-group">
+                <label for="min_difficulty">Minimum Difficulty:</label>
+                {{ form.min_difficulty }}
+            </div>
+            <div class="form-group">
+                <label for="max_difficulty">Maximum Difficulty:</label>
+                {{ form.max_difficulty }}
+            </div>
+            <div class="form-group">
+                <label for="themes">Themes:</label>
+                {{ form.themes }}
+            </div>
+            <div class="form-group">
+                <label for="deadline">Deadline:</label>
+                {{ form.deadline }}
+            </div>
+            <button type="submit" name="submit_homework" class="btn btn-primary">Generate Homework</button>
+        </form>
+    </div>
+    <div class="flexx half box">
+        <h2>Create Test for {{ course.name }}</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ test_form.as_p }}
+            <button type="submit" name="submit_test" class="btn btn-primary">Generate Test</button>
+        </form>
+    </div>
+</div>
+
+{% endblock content %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creeaza tema</title>
+</head>
+<body>
+    <h2>Create Homework for {{ course.name }}</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="num_problems">Number of Problems:</label>
+            {{ form.num_problems }}
+        </div>
+        <div class="form-group">
+            <label for="min_difficulty">Minimum Difficulty:</label>
+            {{ form.min_difficulty }}
+        </div>
+        <div class="form-group">
+            <label for="max_difficulty">Maximum Difficulty:</label>
+            {{ form.max_difficulty }}
+        </div>
+        <div class="form-group">
+            <label for="themes">Themes:</label>
+            {{ form.themes }}
+        </div>
+        <div class="form-group">
+            <label for="deadline">Deadline:</label>
+            {{ form.deadline }}
+        </div>
+        <button type="submit" name="submit_homework" class="btn btn-primary">Generate Homework</button>
+    </form>
+
+    <h2>Create Test for {{ course.name }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ test_form.as_p }}
+        <button type="submit" name="submit_test" class="btn btn-primary">Generate Test</button>
+    </form>
+
+</body>
+</html>

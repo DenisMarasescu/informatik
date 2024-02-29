@@ -1,0 +1,23 @@
+{% extends "problem_generator/base.html" %}
+{% load custom_filters %}
+{%load static%}
+
+{% block content %}
+<div class="box">
+<h1>Subiecte probleme</h1>
+<div class="underline"></div>
+{% for theme_code, theme_name in form.fields.theme.choices %}
+<div class="box notCol align spacebet">
+    <h1 style="margin: 0;">{{ theme_name }}</h1>
+    <form method="post" action="{% url 'generate_problem' %}">
+        {% csrf_token %}
+        <input type="hidden" name="theme" value="{{ theme_code }}">
+        <input type="hidden" name="difficulty" value="medium"> <!-- or any default value -->
+        <input type="hidden" name="num_problems" value="1"> <!-- default to 1 problem -->
+        <!-- Add more fields as needed -->
+        <button type="submit" class="btn" style="margin: 0;">Generează o problemă</button>
+    </form>
+</div>
+{% endfor %}
+</div>
+{% endblock content %}

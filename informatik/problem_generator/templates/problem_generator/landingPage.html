@@ -1,0 +1,89 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EvaluAI</title>
+    <link rel="stylesheet" href="{%static 'problem_generator/css/style.css'%}">
+</head>
+<body>
+    <header>
+        <h1 id="logo" class="colorGray">Evalu<span class="colorBlue">AI</span></h1>
+        <div class="flexx">
+            <a href="">Log In</a>
+            <a href="">/</a>
+            <a href="">Sign up</a>
+        </div>
+    </header>
+    <div class="landing">
+        <div class="flexx col half">
+            <h1 class="titlu">Îmbunatateste-ti abilitatile in programare cu ajutorul AI</h1>
+            <p class="descriere">Platforma interactivă pentru elevi, alimentată de inteligență artificială, generează provocari digitale unice. Încurajează învățarea prin practică, oferind feedback instant și adaptând dificultatea la nivelul fiecărui utilizator.</p>
+            <a href="{%url 'login'%}" class="btnLand">Vreau să exersez</a>
+        </div>
+        <img src="{%static 'problem_generator/assets/laptopEvaluAI.png'%}" alt="">
+    </div>
+    <div class="functionare">
+        <h4>Cum funcționează</h4>
+        <h2>O platforma AI care<br> te ajuta sa îți dezvolți abilitățile de coding</h2>
+        <div class="pasi">
+            <ol class="steps">
+                <li><div class="step-text2">Îți creezi contul pe platformă.</div></li>
+                <li><div class="step-text">Generezi probleme cu ajutorul AI.</div></li>
+                <li><div class="step-text2">AI-ul îți verifică răspunsul și vine cu sugestii.</div></li>
+                <!-- Add more list items as needed -->
+            </ol>
+            
+        </div>
+    </div>
+    <div class="beneficii">
+        <h4>Beneficiile tale</h4>
+        <h2>Folosind Evalu<span class="colorBlue">AI</span> beneficiezi în diferite moduri</h2>
+        
+        <div class="flexx spacebet" style="width: 90%; align-self: center   ;">
+            <div class="beneficiu">
+                <div class="icon">
+                    <img src="{% static 'problem_generator/assets/simple.svg' %}" alt="Icon Description">
+                </div>
+                <div class="description">
+                    <h3>Ușor de folosit</h3>
+                    <p>Codex e creat pentru toți cei care își doresc să învețe mai multe despre programare, fiind extrem de ușor de folosit.</p>
+                </div>
+            </div>
+            <div class="beneficiu">
+                <div class="icon">
+                    <img src="{% static 'problem_generator/assets/fast.svg' %}" alt="Icon Description">
+                </div>
+                <div class="description">
+                    <h3>Sfaturi folositoare și rapide</h3>
+                    <p>Îți oferim rapid feedback pentru răspunsul tău, inclusiv moduri prin care îți poți îmbunătăți codul.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="contact">
+        <div class="flexx col gap half">
+            <img src="{%static 'problem_generator/assets/mail.svg'%}" alt="">
+            <div class="flexx col">
+                <h4>Nu ezita</h4>
+                <h2>Să ne adresezi mai multe întrebări</h2>
+            </div>
+        </div><div class="flexx col gap half align center">
+            <form action="" class="flexx col" style="gap: 0.5rem;">
+                <div class="flexx" style="gap: 0.5rem;">
+                    <input type="text" name="nume" id="" placeholder="Nume">
+                    <input type="text" name="prenume" id="" placeholder="Prenume">
+                </div>
+                <textarea name="Info" id="" cols="30" rows="8" placeholder="Ex: Cum functioneaza...."></textarea>
+                <input type="button" name="submit" id="" class="btn" value="Afla mai multe" style="width: 100%;">
+            </form>
+        </div>
+    </div>
+    <footer>
+        <h1 id="logo" style="color: white;">EvaluAI</h1>
+        <p>Copyright © 2024 EvaluAI</p>
+    </footer>
+</body>
+</html>
