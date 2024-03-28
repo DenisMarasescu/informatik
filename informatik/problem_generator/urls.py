@@ -15,7 +15,7 @@ urlpatterns = [
     path('enroll_in_course/', views.enroll_in_course, name='enroll_in_course'),
     path('course_detail/<uuid:course_id>/', views.course_detail, name='course_detail'),  # Add this line
     path('create_course/', views.create_course, name='create_course'),
-    path('my_courses/', views.my_courses, name='my_courses'),
+    path('clase/', views.my_courses, name='my_courses'),
     path('create_homework/<uuid:course_id>', views.generate_homework, name="create_homework"),
 
     path('homework/<int:homework_id>/', views.homework_detail, name='homework_detail'),

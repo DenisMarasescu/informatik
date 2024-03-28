@@ -26,8 +26,8 @@ def generate_problem(request):
             
             user_prompt = f"Please generate a {difficulty} difficulty problem related to {theme}."
             
-            openai.api_key = settings.OPENAI_API_KEY
-            client = OpenAI()
+            openai.api_key = "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"
+            client = OpenAI(api_key=openai.api_key)
             response = client.chat.completions.create(
                 model="gpt-4-turbo-preview",
                 messages=[
@@ -163,7 +163,7 @@ def my_courses(request):
     if request.user.is_profesor:
         profesor = True
 
-    return render(request, 'problem_generator/my_courses.html', {'courses': courses_taught, 'attending_courses': attending_courses, "profesor": profesor})
+    return render(request, 'problem_generator/my_courses.html', {'courses': courses_taught, 'attending_courses': attending_courses, "profesor": profesor, "page_title":"Clase"})
 
 
 def generate_homework(request, course_id):
@@ -186,8 +186,8 @@ def generate_homework(request, course_id):
             
             user_prompt = f"Please generate a list of {num_problems} informatics problems with difficulty grades from {min_difficulty} to {max_difficulty}  related to the following themes: {selected_themes}. Separate each problem with the symbol </endprob> and separate the problem statement from the input and output using the </s> symbol."
             
-            openai.api_key = settings.OPENAI_API_KEY
-            client = OpenAI()
+            openai.api_key = "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"
+            client = OpenAI(api_key=openai.api_key)
             response = client.chat.completions.create(
                 model="gpt-4-turbo-preview",
                 messages=[
@@ -237,8 +237,8 @@ def generate_homework(request, course_id):
             
             user_prompt = f"Generate a set of {nOq} quiz subjects with incrementing difficulty based on the topics: {topics}"
             
-            openai.api_key = settings.OPENAI_API_KEY
-            client = OpenAI()
+            openai.api_key = "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"
+            client = OpenAI(api_key=openai.api_key)
             response = client.chat.completions.create(
                     model="gpt-4-turbo-preview",
                     messages=[
@@ -293,8 +293,8 @@ def grade_solution(problem_text ,solution_text):
             
     user_prompt = f"Correct the given informatics problem solution based on the 3 benchmarks. The problem statement is: {problem_text}. After each grade, write the </s> symbol. The format for the score output is: Corectitudinea sintaxei: score</s> Eficiența algoritmului: score</s> Lizibilitatea codului: score</s>. Give tips for improvement in romanian after grading, without providing the corrected code. If the provided solution is for the wrong problem, all the grades are automaticly 0. The solution: {solution_text}"
             
-    openai.api_key = settings.OPENAI_API_KEY
-    client = OpenAI()
+    openai.api_key = "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"
+    client = OpenAI(api_key=openai.api_key)
     response = client.chat.completions.create(
             model="gpt-4-turbo-preview",
             messages=[
@@ -346,7 +346,7 @@ def problem_detail(request, problem_id):
             return redirect(request.path)  # Adjust the redirect as needed
     else:
         form = SolutionForm()
-    return render(request, 'problem_generator/problem_detail.html', {'problem': problem, 'form': form, 'latest_solution': latest_solution,})
+    return render(request, 'problem_generator/problem_detail.html', {'problem': problem, 'form': form, 'latest_solution': latest_solution, 'page_title':"Problema"})
 
 def homework_detail(request, homework_id):
     homework = get_object_or_404(Homework, id=homework_id)
@@ -465,8 +465,8 @@ def generate_test(request):
             
             user_prompt = f"Generate a set of {nOq} quiz subjects with incrementing difficulty based on the topics: {topics}"
             
-            openai.api_key = settings.OPENAI_API_KEY
-            client = OpenAI()
+            openai.api_key = "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"
+            client = OpenAI(api_key=openai.api_key)
             response = client.chat.completions.create(
                     model="gpt-4-turbo-preview",
                     messages=[
