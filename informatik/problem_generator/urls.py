@@ -25,4 +25,6 @@ urlpatterns = [
 
     path('', views.landingPage, name="landingPage"),
 
+    path('profile/', views.profile, name='profile'),
+
 ]

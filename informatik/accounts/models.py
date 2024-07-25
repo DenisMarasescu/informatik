@@ -97,6 +97,8 @@ class Solution(models.Model):
     feedback = models.TextField(blank=True, null=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
 
+    grades = models.JSONField(default=dict)
+
     def __str__(self):
         return f"Solution by {self.student} for Problem {self.problem.id}"
     
@@ -126,3 +128,14 @@ class MCQResult(models.Model):
         if self.total_questions > 0:
             return (self.correct_answers / self.total_questions) * 100
         return 0
+    
+
+
+class Message(models.Model):
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sent_messages', on_delete=models.CASCADE)
+    receiver = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='received_messages', on_delete=models.CASCADE)
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Message from {self.sender} to {self.receiver} at {self.timestamp}"

@@ -1,0 +1,48 @@
+{% extends "problem_generator/base.html" %}
+
+{% block content %}
+<h1>{{ user.username }}'s Profile</h1>
+
+<div>
+    <h2>Profile Information</h2>
+    <p>Email: {{ user.email }}</p>
+    <p>Name: {{ user.first_name }} {{ user.last_name }}</p>
+    <p>School: {{ user.school }}</p>
+</div>
+
+<div>
+    <h2>Friend Requests</h2>
+    <h3>Received Requests</h3>
+    <ul>
+        {% for friend_request in received_requests %}
+        <li>
+            {{ friend_request.sender.username }}
+            <form method="post" action="{% url 'accept_friend_request' friend_request.id %}">
+                {% csrf_token %}
+                <button type="submit">Accept Friend Request</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <h3>Sent Requests</h3>
+    <ul>
+        {% for friend_request in sent_requests %}
+        <li>
+            {{ friend_request.receiver.username }}
+            <span>(Pending)</span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div>
+    <h2>Friends</h2>
+    <ul>
+        {% for friend in friends %}
+        <li>{{ friend.username }}</li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% endblock %}

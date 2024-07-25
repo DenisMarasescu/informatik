@@ -86,7 +86,8 @@
                   </svg>Clase</a>
                 <a href="{%url 'generate_problem'%}" class="{% if active_section == 'problems' %}active{% endif %}"><img src="{%static 'problem_generator/assets/settings.svg'%}" alt="">Probleme</a>
                 <!-- <a href="" class="{% if active_section == 'social' %}active{% endif %}"><img src="{%static 'problem_generator/assets/social_alb.svg'%}" alt="">Social</a> -->
-            </nav>
+                <a href="{% url 'profile' %}">Profile</a>
+              </nav>
         </div>
         <div class="postSide">
             <div class="topbar">

@@ -26,7 +26,7 @@ def register(request):
 def user_login(request):
     if request.user.is_authenticated:
         # Redirect to a different page, like the homepage
-        return redirect('my_courses')
+        return redirect('/clase')
 
     if request.method == 'POST':
         form = CustomAuthenticationForm(request, data=request.POST)
@@ -37,7 +37,7 @@ def user_login(request):
             if user is not None:
                 login(request, user)
                 # Redirect to a success page.
-                return redirect("/my_courses")  # Adjust the redirect as necessary
+                return redirect("/clase")  # Adjust the redirect as necessary
             else:
                 # Return an 'invalid login' error message.
                 form.add_error(None, "Invalid username or password.")

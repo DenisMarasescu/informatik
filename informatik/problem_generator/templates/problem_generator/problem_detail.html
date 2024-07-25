@@ -110,8 +110,11 @@
         <div class="solution-feedback">
             <div class="enunt">
                 <h1>Nota: {{latest_solution.grade}} puncte</h1>
+                <h3>Corectitudinea sintaxei: {{ latest_solution.grades.Corectitudinea_sintaxei }} puncte</h3>
+                <h3>Eficiența algoritmului: {{ latest_solution.grades.Eficiența_algoritmului }} puncte</h3>
+                <h3>Lizibilitatea codului: {{ latest_solution.grades.Lizibilitatea_codului }} puncte</h3>
             </div>
-
+            
             <h3>Sfaturi in functie de ultima solutie</h3>
             <div class="flexx col enunt">
                 {% for tip in latest_solution.feedback|split_tips %}

@@ -1,23 +1,31 @@
-{%load static%}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Social</title>
-</head>
-<body>
-    <form method="get" action="">
-        <input type="text" name="query" placeholder="Search for friends...">
-        <button type="submit">Search</button>
-    </form>
-    
-    <ul>
+{% extends "problem_generator/base.html" %}
+
+{% block content %}
+<h1>Search Users</h1>
+
+<!-- Search Form -->
+<form method="get" action="{% url 'search_users' %}">
+    <input type="text" name="query" placeholder="Search for users..." value="{{ request.GET.query }}">
+    <button type="submit">Search</button>
+</form>
+
+<!-- Search Results -->
+<ul>
+    {% if users %}
         {% for user in users %}
         <li>
-            {{ user.username }} - <a href="{% url 'send_request' user.id %}">Add Friend</a>
+            {{ user.username }} ({{ user.email }})
+            {% if user != request.user %}
+            <form method="post" action="{% url 'send_request' user.id %}">
+                {% csrf_token %}
+                <button type="submit">Send Friend Request</button>
+            </form>
+            {% endif %}
         </li>
         {% endfor %}
-    </ul>
-</body>
-</html>
+    {% else %}
+        <li>No users found.</li>
+    {% endif %}
+</ul>
+
+{% endblock %}

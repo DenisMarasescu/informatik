@@ -6,9 +6,13 @@ from django.contrib.auth.decorators import login_required
 from django.db import models 
 from django.contrib import messages
 from django.utils import timezone
+from django.db.models import Q
 import openai
 import random
 from openai import OpenAI
+import os
+from groq import Groq
+import json
 
 from accounts.models import Course, Friendship, Homework, MCQResult, MultipleChoiceProblem, Problem, Solution, User
 from .forms import CourseForm, HomeworkCreationForm, ProblemGenerationForm, SingleDifficultyProblemGenerationForm, SolutionForm, TestCreationForm
@@ -22,23 +26,67 @@ def generate_problem(request):
             theme = dict(form.fields['theme'].choices)[form.cleaned_data['theme']]
             difficulty = form.cleaned_data['difficulty']
             
-            system_prompt = "You are a romanian speaking creative informatics problem generator for highschool students. You have to generate problems of different difficulties, offering a friendly problem statement, an input sample and an output sample. You will output the problems in the following format: Titlu: titlu</s> Enunt: enunt</s> Cerinta: cerinta</s> Input: input</s> Output: output:</s> Restrictii: restrictii</s> Exemplu: exemplu</s> Explicatie exemplu: explicatie</s>. You don't have to offer explanations about the way the problem can be solved. If provided a solution, you can give a grade from 0 to 100. The grading system is based on 3 benchmarks. Corectness of the syntax, efficiency of the algorithm used and the code readability. After grading, explain what can be improved but don't provide a correct solution. You have to output the problems in romanian."
+            # system_prompt = '''You are a romanian speaking creative informatics problem generator for highschool students.
+            #   You have to generate problems of different difficulties, offering a friendly problem statement, an input sample and an output sample.
+            #     You will output the problems in the following format: Titlu: titlu</s> Enunt: enunt</s> Cerinta: cerinta</s> Input: input</s> Output: output:</s> Restrictii: restrictii</s> Exemplu: exemplu</s> Explicatie exemplu: explicatie</s>.
+            #       You don't have to offer explanations about the way the problem can be solved. If provided a solution, you can give a grade from 0 to 100.
+            #         The grading system is based on 3 benchmarks. Corectness of the syntax, efficiency of the algorithm used and the code readability.
+            #           After grading, explain what can be improved but don't provide a correct solution.
+            #             You have to output the problems in romanian.'''
+
+
+            system_prompt = '''You are a romanian speaking creative informatics problem generator for highschool students.
+              You have to generate problems of different difficulties, offering a friendly problem statement, an input sample and an output sample.
+              You will output the problems in the following JSON format:
+              {
+                "Titlu": "titlu",
+                "Enunt": "enunt",
+                "Cerinta": "cerinta",
+                "Input": "input",
+                "Output": "output",
+                "Restrictii": "restrictii",
+                "Exemplu": "exemplu",
+                "Explicatie_exemplu": "explicatie"
+              }
+              You will output only the JSON, nothing more or less.
+              You don't have to offer explanations about the way the problem can be solved. If provided a solution, you can give a grade from 0 to 100.
+              The grading system is based on 3 benchmarks: correctness of the syntax, efficiency of the algorithm used, and code readability.
+              After grading, explain what can be improved but don't provide a correct solution.
+              You have to output the problems only in Romanian.'''
+
             
             user_prompt = f"Please generate a {difficulty} difficulty problem related to {theme}."
             
-            openai.api_key = "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"
-            client = OpenAI(api_key=openai.api_key)
+            # openai.api_key = "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"
+            # client = OpenAI(api_key=openai.api_key, base_url = "https://integrate.api.nvidia.com/v1",)
+            # response = client.chat.completions.create(
+            #     model="nvidia/nemotron-4-340b-instruct",
+            #     messages=[
+            #         {"role": "system", "content": system_prompt},
+            #         {"role": "user", "content": user_prompt}
+            #     ],
+            #     temperature=0.5,
+            #     max_tokens=1024,
+            #     top_p=1,
+            #     frequency_penalty=0,
+            #     presence_penalty=0,
+                
+            # )
+
+
+            client = Groq(api_key="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")
             response = client.chat.completions.create(
-                model="gpt-4-turbo-preview",
                 messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
+                        {
+                            "role": "system",
+                            "content": system_prompt
+                        },
+                        {
+                            "role": "user",
+                            "content": user_prompt,
+                        }
                 ],
-                temperature=0.5,
-                max_tokens=1024,
-                top_p=1,
-                frequency_penalty=0,
-                presence_penalty=0,
+                model="llama3-70b-8192",
             )
             
             generated_problem = response.choices[0].message.content if response.choices else "I couldn't generate a problem. Please try again."
@@ -64,16 +112,26 @@ def correct_problem(request):
     return render(request, 'problem_generator/correct_problem.html')
 
 
+@login_required
 def search_users(request):
     query = request.GET.get('query', '')
-    users = User.objects.exclude(id=request.user.id)
+    users = User.objects.filter(Q(username__icontains=query) | Q(email__icontains=query)).exclude(id=request.user.id)
     return render(request, 'problem_generator/search_users.html', {'users': users})
-
 
 @login_required
 def send_friend_request(request, user_id):
-    receiver = User.objects.get(id=user_id)
-    Friendship.objects.create(sender=request.user, receiver=receiver)
+    receiver = get_object_or_404(User, id=user_id)
+    if receiver == request.user:
+        messages.error(request, "You cannot send a friend request to yourself.")
+        return redirect('search_users')
+    
+    # Check if a friend request already exists
+    friendship, created = Friendship.objects.get_or_create(sender=request.user, receiver=receiver)
+    if created:
+        messages.success(request, f"Friend request sent to {receiver.username}.")
+    else:
+        messages.info(request, f"You have already sent a friend request to {receiver.username}.")
+    
     return redirect('search_users')
 
 
@@ -87,6 +145,8 @@ def accept_friend_request(request, request_id):
     friend_request = Friendship.objects.get(id=request_id)
     friend_request.accepted = True
     friend_request.save()
+    messages.success(request, f"You are now friends with {friend_request.sender.username}.")
+
     return redirect('friend_requests')
 
 @login_required
@@ -288,42 +348,83 @@ def generate_homework(request, course_id):
 
 
 def grade_solution(problem_text ,solution_text):
-    
-    system_prompt = "You are a romanian speaking creative informatics problem generator for highschool students. You have to generate problems of different difficulties, offering a friendly problem statement, an input sample and an output sample. You don't have to offer explanations about the way the problem can be solved. If provided a solution, you can give a grade from 0 to 100. The grading system is based on 3 benchmarks. Corectness of the syntax, efficiency of the algorithm used and the code readability. After grading, explain what can be improved but don't provide a correct solution. The format for the improvement tips is the following: 'Sfaturi: 1.Sfatul numarul 1</s> 2. Sfatul numarul 2</s>......'. You have to output the problems in romanian."
+    system_prompt = """
+    You are a Romanian speaking creative informatics problem grader for high school students.
+    Your job is to ensure the correctness of the code provided and give a grade from 0 to 100 based on 3 benchmarks:
+    - Corectitudinea sintaxei (Correctness of the syntax)
+    - Eficiența algoritmului (Efficiency of the algorithm used)
+    - Lizibilitatea codului (Readability of the code)
+
+    After grading, provide only small tips for improvement in Romanian. Output only the grades and feedback in the following JSON format:
+    {
+        "Corectitudinea_sintaxei": score,
+        "Eficiența_algoritmului": score,
+        "Lizibilitatea_codului": score,
+        "Sfaturi": ["tip 1"\n, "tip 2"\n, ...]
+    }
+    You will output only the JSON, nothing more or less.
+    """
             
-    user_prompt = f"Correct the given informatics problem solution based on the 3 benchmarks. The problem statement is: {problem_text}. After each grade, write the </s> symbol. The format for the score output is: Corectitudinea sintaxei: score</s> Eficiența algoritmului: score</s> Lizibilitatea codului: score</s>. Give tips for improvement in romanian after grading, without providing the corrected code. If the provided solution is for the wrong problem, all the grades are automaticly 0. The solution: {solution_text}"
-            
-    openai.api_key = "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"
-    client = OpenAI(api_key=openai.api_key)
+    user_prompt = f"""
+    Correct the given informatics problem solution based on the 3 benchmarks. The problem statement is: {problem_text}.
+    The solution: {solution_text}
+    """
+
+    # openai.api_key = "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"
+
+    client = Groq(api_key="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")
     response = client.chat.completions.create(
-            model="gpt-4-turbo-preview",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            temperature=0.5,
-            max_tokens=4096,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0,
-    )
-    pattern = r"Corectitudinea sintaxei: (\d+)</s> Eficiența algoritmului: (\d+)</s> Lizibilitatea codului: (\d+)"
-    matches = re.search(pattern, response.choices[0].message.content if response.choices else "")
+                messages=[
+                        {
+                            "role": "system",
+                            "content": system_prompt
+                        },
+                        {
+                            "role": "user",
+                            "content": user_prompt,
+                        }
+                ],
+                model="llama3-70b-8192",
+        )
+    # pattern = r"Corectitudinea sintaxei: (\d+)</s> Eficiența algoritmului: (\d+)</s> Lizibilitatea codului: (\d+)"
+    # matches = re.search(pattern, response.choices[0].message.content if response.choices else "")
 
-    if matches:
-        # Extracting grades
-        grades = [int(matches.group(1)), int(matches.group(2)), int(matches.group(3))]
+    # if matches:
+    #     # Extracting grades
+    #     grades = [int(matches.group(1)), int(matches.group(2)), int(matches.group(3))]
         
-        # Calculate average grade
-        grade = sum(grades) / len(grades)
+    #     # Calculate average grade
+    #     grade = sum(grades) / len(grades)
 
-        # Extract feedback after the grades
-        feedback_start = matches.end()
-        feedback = response.choices[0].message.content[feedback_start:].strip() if len(response.choices[0].message.content) > feedback_start else "Feedback not available."
-    else:
-        grade = 0  # Or some form of handling if grades cannot be extracted
+    #     # Extract feedback after the grades
+    #     feedback_start = matches.end()
+    #     feedback = response.choices[0].message.content[feedback_start:].strip() if len(response.choices[0].message.content) > feedback_start else "Feedback not available."
+    # else:
+    #     grade = 0  # Or some form of handling if grades cannot be extracted
     # feedback = response.choices[0].message.content if response.choices else "I couldn't correct the problem. Please try again."
-    return grade, feedback
+
+    feedback_json = response.choices[0].message.content if response.choices else "{}"
+    print("FEEDBACK: ", feedback_json)
+    try:
+        feedback_data = json.loads(feedback_json)
+        grades = {
+            "Corectitudinea_sintaxei": feedback_data.get("Corectitudinea_sintaxei", 0),
+            "Eficiența_algoritmului": feedback_data.get("Eficiența_algoritmului", 0),
+            "Lizibilitatea_codului": feedback_data.get("Lizibilitatea_codului", 0),
+        }
+        grade = sum(grades.values()) / len(grades)
+        feedback = feedback_data.get("Sfaturi", ["Feedback not available."])
+    except json.JSONDecodeError:
+        grade = 0
+        grades = {
+            "Corectitudinea_sintaxei": 0,
+            "Eficiența_algoritmului": 0,
+            "Lizibilitatea_codului": 0,
+        }
+        feedback = ["Feedback not available."]
+
+    return grade, feedback, grades
+    
 
 @login_required
 def problem_detail(request, problem_id):
@@ -338,9 +439,10 @@ def problem_detail(request, problem_id):
             
             # AI grading
             solution_text = form.cleaned_data['text']
-            grade, feedback = grade_solution(problem.text, solution_text)
+            grade, feedback, grades = grade_solution(problem.text, solution_text)
             solution.grade = grade
             solution.feedback = feedback
+            solution.grades = grades
             
             solution.save()
             return redirect(request.path)  # Adjust the redirect as needed
@@ -543,3 +645,23 @@ def submit_homework(request, homework_id):
     
 def landingPage(request):
     return render(request, 'problem_generator/landingPage.html')
+
+
+@login_required
+def profile(request):
+    received_requests = Friendship.objects.filter(receiver=request.user, accepted=False)
+    sent_requests = Friendship.objects.filter(sender=request.user, accepted=False)
+    friendships = Friendship.objects.filter(
+        models.Q(sender=request.user) | models.Q(receiver=request.user),
+        accepted=True
+    )
+    friends = [friendship.receiver if friendship.sender == request.user else friendship.sender for friendship in friendships]
+    
+    context = {
+        'user': request.user,
+        'received_requests': received_requests,
+        'sent_requests': sent_requests,
+        'friends': friends,
+    }
+    
+    return render(request, 'problem_generator/profile.html', context)
