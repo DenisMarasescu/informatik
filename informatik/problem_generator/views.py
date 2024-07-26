@@ -1,3 +1,5 @@
+import base64
+import io
 import re
 from django.conf import settings
 from django.http import HttpResponse
@@ -13,8 +15,16 @@ from openai import OpenAI
 import os
 from groq import Groq
 import json
+from django.http import JsonResponse  # Add this import
 
-from accounts.models import Course, Friendship, Homework, MCQResult, MultipleChoiceProblem, Problem, Solution, User
+import matplotlib
+matplotlib.use('Agg')  # Use the Agg backend for non-interactive use
+import matplotlib.pyplot as plt
+import pandas as pd
+
+
+
+from accounts.models import Course, Friendship, Homework, MCQResult, MultipleChoiceProblem, Problem, Solution, User, Message
 from .forms import CourseForm, HomeworkCreationForm, ProblemGenerationForm, SingleDifficultyProblemGenerationForm, SolutionForm, TestCreationForm
 
 # Create your views here.
@@ -657,11 +667,60 @@ def profile(request):
     )
     friends = [friendship.receiver if friendship.sender == request.user else friendship.sender for friendship in friendships]
     
+    # Fetch solutions for the logged-in user
+    solutions = Solution.objects.filter(student=request.user).order_by('submitted_at')
+
+    # Prepare data for the chart
+    if solutions:
+        df = pd.DataFrame(list(solutions.values('submitted_at', 'grade')))
+        df['submitted_at'] = pd.to_datetime(df['submitted_at'])
+        df.set_index('submitted_at', inplace=True)
+
+        plt.figure(figsize=(10, 5))
+        plt.plot(df.index, df['grade'], marker='o')
+        plt.title('User Grades Over Time')
+        plt.xlabel('Date')
+        plt.ylabel('Grade')
+        plt.grid(True)
+
+        # Save the plot to a BytesIO object
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        image_base64 = base64.b64encode(buf.read()).decode('utf-8')
+        buf.close()
+
+        chart_url = f"data:image/png;base64,{image_base64}"
+    else:
+        chart_url = None
+    
     context = {
         'user': request.user,
         'received_requests': received_requests,
         'sent_requests': sent_requests,
         'friends': friends,
+        'chart_url': chart_url,
     }
     
     return render(request, 'problem_generator/profile.html', context)
+
+@login_required
+def chat_detail(request, username):
+    return render(request, 'problem_generator/chat.html', {'username': username})
+
+@login_required
+def get_past_messages(request, friend_username):
+    user = request.user
+    friend = User.objects.get(username=friend_username)
+    
+    messages = Message.objects.filter(
+        (Q(sender=user) & Q(receiver=friend)) |
+        (Q(sender=friend) & Q(receiver=user))
+    ).order_by('timestamp')
+
+    messages_data = [
+        {'sender': message.sender.username, 'content': message.content, 'timestamp': message.timestamp}
+        for message in messages
+    ]
+    
+    return JsonResponse(messages_data, safe=False)

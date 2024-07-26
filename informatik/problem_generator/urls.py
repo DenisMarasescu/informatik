@@ -1,6 +1,8 @@
 # problem_generator/urls.py
 from django.urls import path
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('generate/', views.generate_problem, name='generate_problem'),
@@ -27,4 +29,12 @@ urlpatterns = [
 
     path('profile/', views.profile, name='profile'),
 
-]
+    path('messages/<str:friend_username>/', views.get_past_messages, name='get_past_messages'),
+
+
+    # path('chat/<str:username>/', views.chat_detail, name='chat_detail'),
+
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

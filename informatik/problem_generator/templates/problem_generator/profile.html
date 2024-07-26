@@ -40,9 +40,103 @@
     <h2>Friends</h2>
     <ul>
         {% for friend in friends %}
-        <li>{{ friend.username }}</li>
+        <li>
+            {{ friend.username }}
+            <button onclick="openChat('{{ friend.username }}')">Chat</button>
+        </li>
         {% endfor %}
     </ul>
 </div>
+
+<div>
+    <h2>Performance Chart</h2>
+    {% if chart_url %}
+    <img src="{{ chart_url }}" alt="User Grades Over Time">
+    {% else %}
+    <p>No grades available to display.</p>
+    {% endif %}
+</div>
+
+<div id="chat-container" style="display:none;">
+    <h2>Chat with <span id="chat-friend-name"></span></h2>
+    <div id="chat-box" style="border: 1px solid black; height: 300px; overflow-y: scroll;"></div>
+
+    <form id="chat-form" method="post" onsubmit="return false;">
+        {% csrf_token %}
+        <input type="hidden" id="receiver" name="receiver">
+        <textarea id="message-input" rows="3"></textarea>
+        <button type="button" onclick="sendMessage()">Send</button>
+    </form>
+</div>
+
+<script>
+    const chatContainer = document.getElementById('chat-container');
+    const chatFriendName = document.getElementById('chat-friend-name');
+    const chatBox = document.getElementById('chat-box');
+    const messageInput = document.getElementById('message-input');
+    let chatSocket;
+
+    function openChat(friendUsername) {
+        const usernames = [friendUsername, '{{ user.username }}'].sort();
+        const roomName = `chat_${usernames.join('_')}`;
+        
+        chatFriendName.textContent = friendUsername;
+        document.getElementById('receiver').value = friendUsername;
+        chatBox.innerHTML = '';
+        chatContainer.style.display = 'block';
+
+        if (chatSocket) {
+            chatSocket.close();
+        }
+
+        // Fetch past messages
+        fetch(`/messages/${friendUsername}/`)
+            .then(response => response.json())
+            .then(messages => {
+                messages.forEach(data => {
+                    const isSender = data.sender === '{{ user.username }}';
+                    const senderName = isSender ? 'You' : data.sender;
+                    chatBox.innerHTML += '<p><strong>' + senderName + ':</strong> ' + data.content + '</p>';
+                });
+                chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to the bottom
+            });
+
+        chatSocket = new WebSocket(
+            'ws://' + window.location.host + '/ws/chat/' + friendUsername + '/'
+        );
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            const isSender = data.sender === '{{ user.username }}';
+            const senderName = isSender ? 'You' : data.sender;
+            chatBox.innerHTML += '<p><strong>' + senderName + ':</strong> ' + data.message + '</p>';
+            chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to the bottom
+        };
+
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+    }
+
+    function sendMessage() {
+        const message = messageInput.value;
+        if (message.trim() === '') return;
+
+        chatSocket.send(JSON.stringify({
+            'message': message,
+            'sender': '{{ user.username }}'
+        }));
+        messageInput.value = '';
+    }
+
+    // Ensure chat-box is a valid Node before setting up MutationObserver
+    if (chatBox) {
+        const observer = new MutationObserver((mutations) => {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+
+        observer.observe(chatBox, { childList: true });
+    }
+</script>
 
 {% endblock %}

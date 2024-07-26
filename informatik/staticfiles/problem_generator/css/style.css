@@ -1,0 +1,821 @@
+:root{
+    --albastru: #4D8BFF;
+    --icon-color-dark: #ffffff; /* White for dark mode */
+    --icon-color-light: #000634; /* Dark blue for light mode */
+}
+
+body{
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.desktop{
+    display: block;
+}
+.mobile{
+    display: none;
+}
+
+.flexx{
+    display: flex;
+}
+
+.col{
+    flex-direction: column;
+}
+
+.fullV{
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+}
+
+.colorBlue{
+    color: var(--albastru);
+}
+
+.colorGray{
+    color: #535353;
+}
+
+.sidebar{
+    height: 100%;
+    width: 16%;
+    min-width: 15rem;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    padding: 2.2rem 1rem 1.5rem calc(1rem + 1%);
+    gap: 5rem;
+    position: relative;
+    border-right: 2px solid var(--albastru);
+    z-index: 2;
+    background-color: white;
+}
+
+#logo{
+    color: #535353;
+    font-size: 2.9rem;
+    margin: 0;
+}
+
+nav{
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.active{
+    color: #466EB5;
+    text-decoration: underline;
+}
+
+nav a{
+    text-decoration: none;
+    color: #000634; 
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+    
+}
+
+nav a svg{
+    fill: var(--icon-color-light); /* Default to light mode color */
+}
+
+.postSide{
+    height: 100vh;
+    width: 100%;
+
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 16%;
+    bottom: 0;
+    /* overflow: hidden; */
+}
+
+.topbar{
+    width: 100%;
+    height: 6.5rem;
+    border-bottom: 2px solid var(--albastru);
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    padding-left: 2.5rem;
+
+    position: fixed;
+
+    background-color: white;
+}
+
+.topbar h2{
+    font-size: 2.2rem;
+    color: #000000;
+    margin: 0;
+    font-weight: normal;
+}
+
+.container{
+    height: 100%; /* Adjust this height based on the height of your topbar */
+    overflow-y: auto;
+    padding-top: 6.5rem; /* Same as the height of the topbar */
+    box-sizing: border-box;
+    padding-left: 3%;
+    padding-right: 3%;
+    width: calc(100vw - 16%);
+    background-color: #F4F5F5;
+    display: flex;
+    gap: 2rem;
+    flex-direction: column;
+}
+
+.box{
+    width: 100%;
+    border-radius: 0.5rem;
+    box-shadow: 0px 3px 6px #00000029;
+    background-color: #FCFCFC;
+    display: flex;
+    flex-direction: column;
+     padding: 1.2rem 2.5rem;
+     box-sizing: border-box;
+     margin: 2rem 0;
+}
+
+.box h2{
+    font-weight: normal;
+}
+
+.box h1{
+    font-weight: normal;
+}
+
+.box ul{
+    width: 100%;
+    /* padding: 1.5rem; */
+    padding-left: 0;
+    box-sizing: border-box;
+    list-style-type: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.box li{
+    background-color: white;
+    box-shadow: 0px 3px 60px #00000029;
+    width: 100%;
+    height: fit-content;
+    box-sizing: border-box;
+    padding: 1.8rem 1.5rem;
+    border-radius: 0.6rem;
+    color: #272727;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.darkmode--activated .box li{
+    background-color: #222;
+    color: white;
+}
+
+.profileImage{
+    border-radius: 50%;
+    border: 1px solid #272727;
+    background-color: white;
+    height: 4rem;
+    width: 4rem;
+}
+
+.underline{
+    width: 100%;
+    height: 0.15rem;
+    background-color: #BEBEBE;
+    border-radius: 0.3rem;
+    opacity: 0.3;
+    z-index: 1;
+}
+
+.half{
+    width: 50%;
+}
+
+.full{
+    width: 100%;
+}
+
+.fit{
+    width: fit-content;
+}
+
+.course-entrance-code p{
+    font-size: 1.5rem;
+}
+
+.gap{
+    gap: 2rem;
+}
+
+.tema a{
+    text-decoration: none;
+    color: #466EB5; 
+}
+
+.btn{
+    color: white;
+    text-decoration: none;
+    font-size: 1.5rem;
+    background-color: var(--albastru);
+    width: fit-content;
+    padding: 1rem 1.5rem;
+    border-radius: 0.3rem;
+    margin-top: 2rem;
+    cursor: pointer;
+    outline: none;
+    border: 2px solid var(--albastru);
+    transition: all 0.2s;
+}
+
+.btn:hover{
+    background-color: white;
+    box-shadow: 0px 3px 60px #00000029;
+    border: 2px solid var(--albastru);
+    color: var(--albastru);
+}
+
+.box form{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.box form p{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.box input{
+    width: 30%;
+    padding: 0.5rem 1rem;
+    /* outline: none; */
+    border: none;
+    box-shadow: 0px 3px 60px #00000029;
+    border-radius: 0.4rem;
+    outline: #466EB5 solid 2px;
+    /* border: 1px solid #535353; */
+}
+
+.box textarea{
+    outline: 2px solid #466EB5;
+    border: none;
+    box-shadow: 0px 3px 60px #00000029;
+    resize: none;
+    border-radius: 0.4rem;
+    max-height: 15rem;
+    padding: 1rem;
+    font-size: 1.2rem;
+}
+
+.enunt{
+    box-shadow: 0px 3px 60px #00000029;
+    box-sizing: border-box;
+    padding: 1rem 2rem;
+    /* outline: 2px solid var(--albastru); */
+    border-radius: 0.4rem;
+}
+
+.enunt p{
+    font-size: 1.3rem;
+}
+
+.problem{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.tip{
+    font-size: 1.3rem;
+}
+
+.darkmode-toggle {
+    z-index: 3;
+}
+
+/* Dark mode styles */
+.darkmode--activated .container {
+    background-color: #222;
+    color: #fff;
+}
+
+.darkmode--activated .box{
+    background-color: #333;
+}
+
+.darkmode--activated .topbar{
+    border-bottom: 2px solid 	#7ee4e4;
+    background-color: #1d1d1d;
+    
+}
+
+.darkmode--activated .topbar h2{
+    color: white;
+}
+
+.darkmode--activated .sidebar{
+    border-right: 2px solid #7ee4e4;
+    background-color: #222;
+}
+
+.darkmode--activated a{
+    color: white;
+}
+
+.darkmode--activated .colorBlue{
+    color: #7ee4e4;
+}
+
+.darkmode--activated #logo{
+    color: white;
+}
+
+.darkmode--activated nav img{
+    --icon-color-light: var(--icon-color-dark); /* Use dark mode color variable */
+
+}
+
+.darkmode--activated .btn{
+    background-color: #7ee4e4;
+    color: black;
+    border: 2px solid #7ee4e4;
+    transition: all 0.2s;
+}
+
+.darkmode--activated .btn:hover{
+    background-color: #222;
+    color: white;
+}
+
+/*  */
+/* 
+ */
+ /*  */
+
+
+ .loginForm{
+    box-shadow: 0px 3px 60px #00000029;
+    box-sizing: border-box;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 27rem;
+    height: fit-content;
+ }
+
+ .center{
+    align-items: center;
+    justify-content: center;
+ }
+
+ .loginForm input {
+    background-color: #EAEEF2;
+    align-self: flex-start;
+    outline: none;
+    border: none;
+    width: 100%;
+    padding: 0.8rem 1.5rem;
+    border-radius: 0.4rem;
+    box-sizing: border-box;
+}
+
+.loginForm h2{
+    align-self: flex-start;
+    font-weight: normal;
+}
+
+.loginForm p{
+    display: flex;
+    flex-direction: column;
+    align-self: flex-start;
+    width: 100%;
+}
+
+.loginForm label{
+    font-size: 0.8rem;
+}
+
+.loginForm .btn{
+    width: 100%;
+    padding: 0.6rem 1rem;
+}
+
+
+
+.textMare{
+    font-weight: normal;
+    font-size: 2.5rem;
+}
+
+.notCol{
+    flex-direction: row;
+}
+
+.align{
+    align-items: center;
+}
+
+.alignEnd{
+    align-items: flex-end;
+}
+
+.spacebet{
+    justify-content: space-between;
+}
+
+.clasa *{
+    margin: 0;
+}
+
+.clasa{
+    padding: 2rem;
+}
+
+.darkmode--activated .clasa a{
+    color: black;
+}
+
+.container, .box, .topbar, .sidebar{
+    transition: all 0.15s;
+}
+
+.darkmode--activated .colorGray{
+    color: white;
+}
+
+.form input[type="checkbox"]{
+    outline: none;
+}
+
+/* Landing page */
+
+header{
+    width: 100vw;
+    display: flex;
+    height: 15vh;
+    justify-content: space-between;
+    box-sizing: border-box;
+    padding: 3rem 10.5vw;
+    align-items: center;
+}
+
+header a{
+    font-size: 1.3rem;
+    color: black;
+    text-decoration: none;
+}
+
+.landing{
+    display: flex;
+    gap: 2rem;
+    height: 85vh;
+    width: 100%;
+    box-sizing: border-box;
+    align-items: center;
+    padding: 0 10.5vw;
+    justify-content: space-between;
+}
+
+.titlu{
+    font-size: 4rem;
+    line-height: 5.5rem;
+    margin: 0;
+}
+
+.descriere{
+    width: 65%; 
+    font-size: 1.2rem;
+}
+
+.btnLand{
+    background-color: var(--albastru);
+    width: fit-content;
+    padding: 1rem 2.5rem;
+    border-radius: 1.5rem;
+    color: white;
+    text-decoration: none;
+    font-size: 1.5rem;
+}
+
+.landing img{
+    width: 36.5%;
+    height: auto;
+}
+
+.functionare{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+}
+
+.functionare h4{
+    color: #466EB5;
+    font-size: 1.3rem;
+}
+
+.functionare h2{
+    text-align: center;
+}
+
+.pasi{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.steps {
+    list-style: none;
+    counter-reset: step-counter;
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.steps li {
+    counter-increment: step-counter;
+    width: 2rem;
+    height: 2rem;
+    line-height: 2rem;
+    border: 2px solid #466EB5;
+    border-radius: 50%;
+    text-align: center;
+    margin: 0 0 4rem 20px;
+    position: relative;
+    background-color: #466EB5;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem; /* Adjusted for better visibility */
+}
+.steps li::before {
+    content: counter(step-counter);
+    font-weight: bold;
+}
+.steps li:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    width: 2px;
+    height: 4.2rem; /* This height controls the distance between the circles */
+    background-color: #466EB5;
+    transform: translateX(-50%);
+}
+.step-text {
+    position: absolute;
+    left: 3.5rem; /* Adjust as needed */
+    top: 50%;
+    transform: translateY(-50%);
+    white-space: nowrap; /* Keeps text on one line */
+    color: black;
+}
+
+.step-text2 {
+    position: absolute;
+    right: 3.5rem; /* Adjust as needed */
+    top: 50%;
+    transform: translateY(-50%);
+    white-space: nowrap; /* Keeps text on one line */
+    color: black;
+}
+
+.beneficii{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+    
+    padding: 0 12vw;
+    margin-top: 15rem;
+}
+
+.beneficii h4{
+    color: #466EB5;
+    font-size: 1.3rem;
+    margin: 0.2rem;
+}
+
+.beneficiu{
+    display: grid;
+    width: 40%;
+    grid-template-columns: 30% 70%;
+    align-items: center; /* This will vertically center the items */
+}
+
+.beneficiu .icon {
+    text-align: center; /* Center the image within the icon div if needed */
+}
+
+.beneficiu .description {
+    /* Styling for the text part */
+}
+
+
+.contact{
+    width: calc(100%-24vw);
+    box-sizing: border-box;
+    margin: 0 12vw;
+    height: 40rem;
+    background-color: #E2EAFF;
+    display: flex;
+    margin-top: 15rem;
+    margin-bottom: 10rem;
+    border-radius: 1.5rem;
+    padding: 0 10%;
+}
+
+.contact img {
+    transform: translate(-3rem, -3rem); /* Move left by 3rem and up by 3rem */
+}
+
+.contact h4{
+    color: #466EB5;
+    margin: 0;
+}
+
+.contact h2{
+    font-size: 2rem;
+}
+
+.contact input{
+    outline: none;
+    border: none;
+    font: 1.2rem;
+    padding: 1.2rem 1.5rem;
+    border-radius: 1rem;
+}
+
+.contact textarea{
+   resize: none;
+   outline: none;
+   border: none;
+   font-size: 1.2rem;
+   padding: 1.2rem 1.5rem; 
+   border-radius: 1rem;
+}
+
+footer{
+    margin-top: auto;
+    width: 100%;
+    height: 30vh;
+    background-color: #3F64A7;
+    box-sizing: border-box;
+    padding: 2rem 12vw;
+    display: flex;
+    flex-direction: column;
+}
+
+footer p{
+    color: white;
+}
+
+.box input[type="radio"]{
+    border: none;
+    width: fit-content; 
+    outline: none;
+
+    height: 2rem;
+    width: 2rem;
+   
+}
+
+.box input[type="checkbox"]{
+    border: none;
+    width: fit-content;
+    outline: none;
+    height: 2rem;
+    width: 2rem;
+}
+
+.enuntQuiz{
+    font-size: 1.5rem;
+}
+
+
+
+#loadingOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Ensure it sits above other content */
+}
+
+
+@media only screen and (max-width: 960px) {
+    .desktop{
+        display: none;
+    }
+    .mobile{
+        display: flex;
+        height: 100vh;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem 0.5rem;
+    }
+
+    h1{
+        font-size: 4rem !important;
+        align-self: flex-start;
+        margin-bottom: 2rem !important;
+    }
+    h4{
+        font-size: 2rem;
+    }
+    .pasi{
+        align-self: flex-start;
+        padding-left: 0.2rem;
+        padding-right: 0.2rem;
+    }
+
+    .step-text {
+        position: absolute;
+        left: 3.5rem; /* Adjust as needed */
+        top: 50%;
+        transform: translateY(-50%);
+        white-space:normal; /* Keeps text on one line */
+        color: black;
+        width: 15rem;
+    }
+
+    .steps li {
+        counter-increment: step-counter;
+        width: 2rem;
+        height: 2rem;
+        line-height: 2rem;
+        border: 2px solid #466EB5;
+        border-radius: 50%;
+        text-align: center;
+        margin: 0 0 5rem 20px;
+        position: relative;
+        background-color: #466EB5;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.5rem; /* Adjusted for better visibility */
+    }
+    .steps li::before {
+        content: counter(step-counter);
+        font-weight: bold;
+    }
+    .steps li:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 100%;
+        width: 2px;
+        height: 5.2rem; /* This height controls the distance between the circles */
+        background-color: #466EB5;
+        transform: translateX(-50%);
+    }
+
+    #benficiimobil{
+        flex-direction: column;
+        width: 100%;
+        margin-bottom: 2.5rem;
+    }
+
+    .beneficii{
+        margin-top: 0.5rem;
+        align-items: center;
+        margin-bottom: 2.5rem;
+        padding: 0 0.2rem;
+    }
+
+    .beneficii h2{
+        text-align: center;
+    }
+
+    .beneficiu{
+        width: 100%;
+    }
+
+    .beneficii h3{
+        font-size: 1.5rem;
+    }
+
+    .beneficii p{
+        font-size: 1.1rem;
+    }
+  }
