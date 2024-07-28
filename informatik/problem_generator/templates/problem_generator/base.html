@@ -550,13 +550,57 @@
             chatContainer.appendChild(messageElement);
         }
 
+        function formatMessageContent(message) {
+            // Split the message into lines
+            const lines = message.split('\n');
+            let formattedMessage = '';
+
+            lines.forEach(line => {
+                if (line.startsWith('```')) {
+                    // Handle code blocks
+                    formattedMessage += `<pre><code>${line.replace('```', '').trim()}</code></pre>`;
+                } else if (line.startsWith('- ')) {
+                    // Handle bullet points
+                    if (!formattedMessage.endsWith('</ul>')) {
+                        formattedMessage += '<ul>';
+                    }
+                    formattedMessage += `<li>${line.replace('- ', '').trim()}</li>`;
+                    if (lines[lines.indexOf(line) + 1] && !lines[lines.indexOf(line) + 1].startsWith('- ')) {
+                        formattedMessage += '</ul>';
+                    }
+                } else if (line.match(/^\d+\./)) {
+                    // Handle numbered lists
+                    if (!formattedMessage.endsWith('</ol>')) {
+                        formattedMessage += '<ol>';
+                    }
+                    formattedMessage += `<li>${line.replace(/^\d+\.\s*/, '').trim()}</li>`;
+                    if (lines[lines.indexOf(line) + 1] && !lines[lines.indexOf(line) + 1].match(/^\d+\./)) {
+                        formattedMessage += '</ol>';
+                    }
+                } else {
+                    // Handle normal paragraphs
+                    formattedMessage += `<p>${line.trim()}</p>`;
+                }
+            });
+
+            // Close any open lists
+            if (formattedMessage.endsWith('<ul>')) {
+                formattedMessage += '</ul>';
+            }
+            if (formattedMessage.endsWith('<ol>')) {
+                formattedMessage += '</ol>';
+            }
+
+            return formattedMessage;
+        }
+
         async function sendAIQuery() {
             const queryInput = document.getElementById('ai-tutor-input');
             const query = queryInput.value;
             if (!query.trim()) return;
 
             const chatContainer = document.getElementById('ai-tutor-chat');
-            appendMessageToChat(chatContainer, query, 'sent', 'You');
+            appendFormattedMessage(chatContainer, query, 'sent', 'You');
             appendAITypingIndicator(chatContainer);
             queryInput.value = '';
 
@@ -571,8 +615,23 @@
 
             const result = await response.json();
             removeAITypingIndicator(chatContainer);
-            appendMessageToChat(chatContainer, result.response, 'received', 'AI');
+            appendFormattedMessage(chatContainer, result.response, 'received', 'AI');
             chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function appendFormattedMessage(chatContainer, message, messageType, senderName) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', messageType);
+
+            let formattedMessage;
+            if (messageType === 'received') {
+                formattedMessage = formatMessageContent(message);
+            } else {
+                formattedMessage = message;
+            }
+
+            messageElement.innerHTML = `<div class="sender">${senderName}</div><div class="content">${formattedMessage}</div>`;
+            chatContainer.appendChild(messageElement);
         }
 
 
