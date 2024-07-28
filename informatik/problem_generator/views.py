@@ -1,5 +1,6 @@
 import base64
 import io
+import logging
 import re
 from django.conf import settings
 from django.http import HttpResponse
@@ -8,7 +9,13 @@ from django.contrib.auth.decorators import login_required
 from django.db import models 
 from django.contrib import messages
 from django.utils import timezone
-from django.db.models import Q
+from django.db.models import Q, Count, Avg, Sum
+from django.views.decorators.http import require_POST
+from django.utils.decorators import method_decorator
+from django.views import View
+from accounts.forms import UserProfileForm
+import problem_generator.badges as Badges
+from django.views.decorators.csrf import csrf_exempt
 import openai
 import random
 from openai import OpenAI
@@ -24,7 +31,7 @@ import pandas as pd
 
 
 
-from accounts.models import Course, Friendship, Homework, MCQResult, MultipleChoiceProblem, Problem, Solution, User, Message
+from accounts.models import Course, Friendship, Homework, MCQResult, MultipleChoiceProblem, Problem, Solution, User, Message, Notification
 from .forms import CourseForm, HomeworkCreationForm, ProblemGenerationForm, SingleDifficultyProblemGenerationForm, SolutionForm, TestCreationForm
 
 # Create your views here.
@@ -35,15 +42,6 @@ def generate_problem(request):
             print("E VALID")
             theme = dict(form.fields['theme'].choices)[form.cleaned_data['theme']]
             difficulty = form.cleaned_data['difficulty']
-            
-            # system_prompt = '''You are a romanian speaking creative informatics problem generator for highschool students.
-            #   You have to generate problems of different difficulties, offering a friendly problem statement, an input sample and an output sample.
-            #     You will output the problems in the following format: Titlu: titlu</s> Enunt: enunt</s> Cerinta: cerinta</s> Input: input</s> Output: output:</s> Restrictii: restrictii</s> Exemplu: exemplu</s> Explicatie exemplu: explicatie</s>.
-            #       You don't have to offer explanations about the way the problem can be solved. If provided a solution, you can give a grade from 0 to 100.
-            #         The grading system is based on 3 benchmarks. Corectness of the syntax, efficiency of the algorithm used and the code readability.
-            #           After grading, explain what can be improved but don't provide a correct solution.
-            #             You have to output the problems in romanian.'''
-
 
             system_prompt = '''You are a romanian speaking creative informatics problem generator for highschool students.
               You have to generate problems of different difficulties, offering a friendly problem statement, an input sample and an output sample.
@@ -126,7 +124,12 @@ def correct_problem(request):
 def search_users(request):
     query = request.GET.get('query', '')
     users = User.objects.filter(Q(username__icontains=query) | Q(email__icontains=query)).exclude(id=request.user.id)
-    return render(request, 'problem_generator/search_users.html', {'users': users})
+    
+    # Fetch the user's friends
+    friendships = Friendship.objects.filter(Q(sender=request.user) | Q(receiver=request.user), accepted=True)
+    friends = {friendship.receiver.id if friendship.sender == request.user else friendship.sender.id for friendship in friendships}
+    
+    return render(request, 'problem_generator/search_users.html', {'users': users, 'friends': friends})
 
 @login_required
 def send_friend_request(request, user_id):
@@ -157,7 +160,7 @@ def accept_friend_request(request, request_id):
     friend_request.save()
     messages.success(request, f"You are now friends with {friend_request.sender.username}.")
 
-    return redirect('friend_requests')
+    return redirect('profile')
 
 @login_required
 def view_friends(request):
@@ -236,11 +239,12 @@ def my_courses(request):
     return render(request, 'problem_generator/my_courses.html', {'courses': courses_taught, 'attending_courses': attending_courses, "profesor": profesor, "page_title":"Clase"})
 
 
+@login_required
 def generate_homework(request, course_id):
     course = get_object_or_404(Course, id=course_id)
     if request.user not in course.teachers.all():
         return redirect('course_detail', course_id=course.id)
-    
+
     if request.method == 'POST':
         form = HomeworkCreationForm(request.POST)
         test_form = TestCreationForm(request.POST or None)
@@ -248,113 +252,147 @@ def generate_homework(request, course_id):
             num_problems = form.cleaned_data['num_problems']
             min_difficulty = form.cleaned_data['min_difficulty']
             max_difficulty = form.cleaned_data['max_difficulty']
-            selected_themes = form.cleaned_data['themes']  # This will be a list of selected theme keys
-            deadline = form.cleaned_data['deadline']  # Make sure to add a DateTimeField in your form for the deadline
+            selected_themes = form.cleaned_data['themes']
+            deadline = form.cleaned_data['deadline']
+            title = form.cleaned_data.get('title', 'Untitled')
+            description = form.cleaned_data.get('description', '')
 
+            print(f"Generating {num_problems} problems with difficulty from {min_difficulty} to {max_difficulty} for themes {selected_themes}")
 
-            system_prompt = "You are a romanian speaking creative informatics problem generator for highschool students. You have to generate problems of different difficulties, offering a friendly problem statement, an input sample and an output sample. You will output the problems in the following format: Titlu: titlu</s> Enunt: enunt</s> Cerinta: cerinta</s> Input: input</s> Output: output:</s> Restrictii: restrictii</s> Exemplu: exemplu</s> Explicatie exemplu: explicatie</s>. You don't have to offer explanations about the way the problem can be solved. If provided a solution, you can give a grade from 0 to 100. The grading system is based on 3 benchmarks. Corectness of the syntax, efficiency of the algorithm used and the code readability. After grading, explain what can be improved but don't provide a correct solution. You have to output the problems in romanian."
-            
-            user_prompt = f"Please generate a list of {num_problems} informatics problems with difficulty grades from {min_difficulty} to {max_difficulty}  related to the following themes: {selected_themes}. Separate each problem with the symbol </endprob> and separate the problem statement from the input and output using the </s> symbol."
-            
-            openai.api_key = "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"
-            client = OpenAI(api_key=openai.api_key)
+            system_prompt = '''You are a romanian speaking creative informatics problem generator for highschool students.
+            You have to generate problems of different difficulties, offering a friendly problem statement, an input sample and an output sample.
+            You will output the problems in the following JSON format:
+            {
+                "Titlu": "titlu",
+                "Enunt": "enunt",
+                "Cerinta": "cerinta",
+                "Input": "input",
+                "Output": "output",
+                "Restrictii": "restrictii",
+                "Exemplu": "exemplu",
+                "Explicatie_exemplu": "explicatie"
+            }
+            You will output only the JSON, nothing more or less.
+            You don't have to offer explanations about the way the problem can be solved. If provided a solution, you can give a grade from 0 to 100.
+            The grading system is based on 3 benchmarks: correctness of the syntax, efficiency of the algorithm used, and code readability.
+            After grading, explain what can be improved but don't provide a correct solution. You have to output the problems only in Romanian.'''
+
+            user_prompt = f"Please generate a list of {num_problems} informatics problems with difficulty grades from {min_difficulty} to {max_difficulty} related to the following themes: {selected_themes}."
+
+            print(f"User prompt: {user_prompt}")
+
+            client = Groq(api_key="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")
             response = client.chat.completions.create(
-                model="gpt-4-turbo-preview",
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
+                    {"role": "user", "content": user_prompt},
                 ],
-                temperature=0.5,
-                max_tokens=2048,
-                top_p=1,
-                frequency_penalty=0,
-                presence_penalty=0,
+                model="llama3-70b-8192",
             )
-            
+
             generated_problems = response.choices[0].message.content if response.choices else "I couldn't generate a problem. Please try again."
+            print(f"Generated problems: {generated_problems}")
 
-            problem_texts = generated_problems.split('</endprob>')
-            # Save the generated homework
-            homework = Homework.objects.create(
-                course=course,
-                problems='',
-                deadline=deadline,
-                grading_criteria={  # Example criteria, adjust as needed
-                    'correctness': 50,
-                    'efficiency': 30,
-                    'readability': 20,
-                }
-            )
+            # Extract the JSON part of the response
+            json_start_index = generated_problems.find("[")
+            json_end_index = generated_problems.rfind("]") + 1
+            json_content = generated_problems[json_start_index:json_end_index]
+            
+            print(f"Extracted JSON: {json_content}")
 
-            for problem_text in problem_texts:
-                if problem_text.strip():  # Check if the problem text is not just whitespace
-                    Problem.objects.create(
+            try:
+                problems_json = json.loads(json_content)
+                homework = Homework.objects.create(
+                    course=course,
+                    problems='',  # Can be left empty or store a summary
+                    deadline=deadline,
+                    title=title,
+                    description=description,
+                    grading_criteria={'correctness': 50, 'efficiency': 30, 'readability': 20},
+                )
+
+                problem_texts = []
+                for problem in problems_json:
+                    problem_instance = Problem.objects.create(
                         homework=homework,
-                        text=problem_text.strip(),
-                        # Optionally set 'index' or other fields if needed
+                        text=json.dumps(problem),  # Save the problem as JSON text
                     )
+                    problem_texts.append(problem_instance.text)
+                    print(f"Saved problem: {problem}")
 
-            return redirect('/problems/course_detail', course_id=course.id)
+                # Optionally, you can save a summary or some reference to problems in the `problems` field
+                homework.problems = "\n".join(problem_texts)
+                homework.save()
+
+                print(f"Homework created: {homework.id}")
+                return redirect('course_detail', course_id=course.id)
+
+            except json.JSONDecodeError as e:
+                print(f"JSON decode error: {e}")
+                messages.error(request, "Failed to parse the generated problems. Please try again.")
+                return redirect('create_homework', course_id=course.id)
+            
         elif 'submit_test' in request.POST and test_form.is_valid():
             topics = test_form.cleaned_data.get('topics')
-            print("\n\n\n\n", topics, "\n\n\n\n")
             difficulty = test_form.cleaned_data.get('difficulty')
             nOq = test_form.cleaned_data.get('number_of_problems')
-            print("\n\n\n\n\n\n", nOq, "\n\n\n\n")
             deadline = test_form.cleaned_data['deadline']
+            title = test_form.cleaned_data.get('title', 'Untitled')
 
-            system_prompt = "You are a creative, romanian speaking, informatics problem generator that creates multiple problems with quiz-like answers in the following format: Question 1: What is X? </s>A. Option1 </s>B. Option2 </s>C. Option3 </s>**Correct: A. You task is to generate a specified number of such problems. The questions can be from simple theory questions to provided code separated from the question by ```(before and after it) with provided input and you will have to tell the correct output. Every qustion has to start with '#### Question'. The output has to be in romanian."
-            
+            system_prompt = '''You are a creative, romanian speaking, informatics problem generator that creates multiple problems with quiz-like answers in the following format:
+            {
+                "Question": "What is X?",
+                "Choices": ["A. Option1", "B. Option2", "C. Option3"],
+                "Correct": "A",
+                "CodeSnippet": "optional code snippet"
+            }
+            Your task is to generate a specified number of such problems. The questions can be from simple theory questions to provided code separated from the question by ``` (before and after it) with provided input and you will have to tell the correct output.'''
+
             user_prompt = f"Generate a set of {nOq} quiz subjects with incrementing difficulty based on the topics: {topics}"
-            
-            openai.api_key = "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"
-            client = OpenAI(api_key=openai.api_key)
+
+            print(f"User prompt for test: {user_prompt}")
+
+            client = Groq(api_key="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")
             response = client.chat.completions.create(
-                    model="gpt-4-turbo-preview",
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt}
-                    ],
-                    temperature=0.5,
-                    max_tokens=4096,
-                    top_p=1,
-                    frequency_penalty=0,
-                    presence_penalty=0,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                model="llama3-70b-8192",
             )
 
             test = Homework.objects.create(
-                    title=test_form.cleaned_data['title'],
-                    deadline=deadline,
-                    course=course,
-
-                )  # Adjust according to your model
+                title=test_form.cleaned_data['title'],
+                deadline=deadline,
+                course=course,
+            )
 
             ai_output = response.choices[0].message.content
-            print("AI Output:", ai_output)
+            print(f"AI output for test: {ai_output}")
             parsed_questions = parse_ai_output(ai_output)
+
+            print(f"Parsed questions: {parsed_questions}")
 
             for question in parsed_questions:
                 MultipleChoiceProblem.objects.create(
                     homework=test,
-                    question=question['question'] + "\n\n" +question['code_snippet'] + "\n\n",
+                    question=question['question'] + "\n\n" + question['code_snippet'] + "\n\n",
                     choices=question['choices'],
                     correct_answer=question['correct_answer'],
-                    
                 )
+                print(f"Saved question: {question}")
 
-            # Here, you handle the creation of the test based on the form data
-            # This might include creating a new Test object and associating questions with it
-            
-            # Redirect to a confirmation page or the test detail page
-
-            return redirect('/problems/course_detail', course_id=course.id)
+            print(f"Test created: {test.id}")
+            return redirect('course_detail', course_id=course.id)
         else:
-            print(test_form.errors)
+            print(f"Form errors: {form.errors}")
+            print(f"Test form errors: {test_form.errors}")
     else:
         form = HomeworkCreationForm()
         test_form = TestCreationForm()
 
-    return render(request, 'problem_generator/generate_homework.html', {'form': form, 'course': course, 'test_form': test_form,})
+    return render(request, 'problem_generator/generate_homework.html', {'form': form, 'course': course, 'test_form': test_form})
+
 
 
 def grade_solution(problem_text ,solution_text):
@@ -447,6 +485,9 @@ def problem_detail(request, problem_id):
             solution.problem = problem
             solution.student = request.user  # Assuming the user is logged in
             
+            Badges.check_and_award_centurion_badge(request.user)
+            Badges.check_and_award_first_problem_solved_badge(request.user)
+
             # AI grading
             solution_text = form.cleaned_data['text']
             grade, feedback, grades = grade_solution(problem.text, solution_text)
@@ -462,32 +503,25 @@ def problem_detail(request, problem_id):
 
 def homework_detail(request, homework_id):
     homework = get_object_or_404(Homework, id=homework_id)
-    is_teacher = request.user in homework.course.teachers.all()  # Check if the user is a teacher of the course
+    is_teacher = request.user in homework.course.teachers.all()
+    problems = homework.probleme.all()  # Retrieve the associated problems
+
     context = {
         'homework': homework,
         'is_teacher': is_teacher,
-        # Additional context data...
+        'problems': problems,  # Pass the problems to the template
     }
 
     if is_teacher:
         submissions = MCQResult.objects.filter(homework=homework).select_related('student')
         for submission in submissions:
-            # Assuming the grade is already calculated and saved in MCQResult
-            # If you need to calculate it here instead, you can do so based on submission details
-            # For example, if grades are not pre-calculated:
             submission.grade = (submission.correct_answers / submission.total_questions) * 100
-            context['submissions'] = submissions
-            pass  # Remove this pass statement once you add any necessary logic
+        context['submissions'] = submissions
+        context['mcq_results'] = submissions  # Ensure mcq_results is passed to the template
     else:
-        submissions = None  # Students do not need to see all submissions, only their own
-    
-
-    if request.user.is_profesor:
-        mcq_results = MCQResult.objects.filter(homework=homework)
-        context['mcq_results'] = mcq_results
+        context['submissions'] = None
 
     return render(request, 'problem_generator/homework_detail.html', context)
-
 # @login_required
 # def view_solutions(request, problem_id):
 #     problem = get_object_or_404(Problem, id=problem_id)
@@ -524,43 +558,33 @@ def homework_detail(request, homework_id):
 #         return redirect('some_result_page')
     
 
+
+import re
+
 def parse_ai_output(ai_output):
-    # Split the output into questions
-    questions_parts = ai_output.split('#### ')[1:]  # Each question starts with '#### '
-    parsed_questions = []
+    try:
+        # Regular expression to find JSON-like structures
+        pattern = re.compile(r'\{.*?\}', re.DOTALL)
+        matches = pattern.findall(ai_output)
+        
+        parsed_questions = []
+        for match in matches:
+            try:
+                question = json.loads(match)
+                parsed_questions.append({
+                    'question': question.get('Question', ''),
+                    'choices': question.get('Choices', []),
+                    'correct_answer': question.get('Correct', ''),
+                    'code_snippet': question.get('CodeSnippet', '')
+                })
+            except json.JSONDecodeError as e:
+                print(f"JSON decoding error for match: {match}. Error: {e}")
+        
+        return parsed_questions
+    except json.JSONDecodeError as e:
+        print(f"JSON decoding error for ai_output: {ai_output}. Error: {e}")
+        return []  # Return an empty list if JSON decoding fails
 
-    for part in questions_parts:
-        # Initialize a dictionary to hold the parts of each question
-        question_data = {'question': '', 'choices': [], 'correct_answer': '', 'code_snippet': ''}
-        lines = part.split('\n')
-        
-        # Extract the question text and detect if there's a code block
-        in_code_block = False
-        code_snippet = []
-        for line in lines:
-            if line.strip().startswith('```'):  # Detect code block start or end
-                in_code_block = not in_code_block
-                continue  # Skip the code block markers themselves
-            
-            if in_code_block:
-                code_snippet.append(line)
-            elif line.startswith('A.') or line.startswith('B.') or line.startswith('C.'):
-                question_data['choices'].append(line)
-            elif line.startswith('**Correct:'):
-                correct_answer = line.split('**')[1].strip()
-                question_data['correct_answer'] = correct_answer.split('.')[0]  # Extract just the letter
-            else:
-                # Append line to question text if not in code block and not a choice
-                if line.strip() and not in_code_block:
-                    question_data['question'] += line + '\n'
-        
-        # Join the code snippet lines back together, if any
-        if code_snippet:
-            question_data['code_snippet'] = '\n'.join(code_snippet)
-        
-        parsed_questions.append(question_data)
-
-    return parsed_questions
 
 
 
@@ -625,7 +649,6 @@ def submit_homework(request, homework_id):
         total = mc_problems.count()
 
         # Check if the student has already submitted answers
-        # Prevents re-submission if not a teacher
         if not student.is_profesor and MCQResult.objects.filter(student=student, homework=homework).exists():
             messages.error(request, "You have already submitted your answers for this homework.")
             return redirect('course_detail', course_id=homework.course.id)
@@ -633,11 +656,15 @@ def submit_homework(request, homework_id):
         # Iterate over each multiple-choice problem to check answers
         for mc_problem in mc_problems:
             # The key in request.POST should match the input's name attribute
-            selected_answer = "Correct: " + request.POST.get(f'question_{mc_problem.id}', None)
+            selected_answer = request.POST.get(f'question_{mc_problem.id}', None)
+            print(f"Question ID: {mc_problem.id}")
+            print(f"Selected Answer: {selected_answer}")
+            print(f"Correct Answer: {mc_problem.correct_answer}")
 
             # Check if the selected answer is correct
             if selected_answer and selected_answer == mc_problem.correct_answer:
                 score += 1
+            print(f"Current Score: {score}")
 
         # Create or update the MCQResult for the student and this homework
         MCQResult.objects.update_or_create(
@@ -724,3 +751,209 @@ def get_past_messages(request, friend_username):
     ]
     
     return JsonResponse(messages_data, safe=False)
+
+
+
+
+@login_required
+def ai_tutor(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        user_query = data.get('query')
+        
+        # Call your AI model here (using Groq)
+        # client = Groq(api_key="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")
+        client = OpenAI(api_key="sk-proj-5LYdTeWDkM9LdeKs3zAHT3BlbkFJmSa6ZjHKoLX1KKiFuTgU")
+        response = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": "You are a romanian/english helpful informatics tutor. Your task is to provide easy to understand answers about programming in general. Anything outside of the programming field will not be answered to. Also, you will not give solving solutions to informatics problems if provided. The answer must be completly plain text and new lines marked with '\n'"},
+                {"role": "user", "content": user_query}
+            ],
+            model="gpt-4o-mini",
+        )
+        ai_response = response.choices[0].message.content if response.choices else "I couldn't find an answer. Please try again."
+        
+        return JsonResponse({'response': ai_response})
+
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+
+
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.social_links = form.cleaned_data['social_links']
+            user.save()
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('profile')
+        else:
+            messages.error(request, 'Error updating profile. Please check the form and try again.')
+            print(form.errors)  # Debugging: print form errors to the console
+    else:
+        user = request.user
+        initial_data = {
+            'link1': user.social_links.get('link1'),
+            'link2': user.social_links.get('link2'),
+            'link3': user.social_links.get('link3'),
+            'link4': user.social_links.get('link4'),
+            'link5': user.social_links.get('link5'),
+        }
+        form = UserProfileForm(instance=user, initial=initial_data)
+    return render(request, 'problem_generator/edit_profile.html', {'form': form})
+
+
+
+@login_required
+def leaderboard(request):
+    # Calculate total problems solved and average score for each user
+    leaderboard_data = (
+        User.objects.annotate(
+            total_solved=Count('solutions', filter=models.Q(solutions__grade__gte=75)),
+            total_score=Sum('solutions__grade', filter=models.Q(solutions__grade__gte=75)),
+            avg_score=Avg('solutions__grade', filter=models.Q(solutions__grade__gte=75))
+        )
+        .order_by('-total_score', '-avg_score', '-total_solved')[:25]
+    )
+
+    return render(request, 'problem_generator/leaderboard.html', {'leaderboard_data': leaderboard_data})
+
+
+@login_required
+def view_profile(request, username):
+    user = get_object_or_404(User, username=username)
+    received_requests = user.received_friend_requests.filter(accepted=False)
+    sent_requests = user.sent_friend_requests.filter(accepted=False)
+    friendships = user.sent_friend_requests.filter(accepted=True) | user.received_friend_requests.filter(accepted=True)
+    friends = [friendship.receiver if friendship.sender == user else friendship.sender for friendship in friendships]
+
+    context = {
+        'user_profile': user,
+        'received_requests': received_requests,
+        'sent_requests': sent_requests,
+        'friends': friends,
+    }
+    return render(request, 'problem_generator/view_profile.html', context)
+
+
+@login_required
+def get_notifications(request):
+    notifications = Notification.objects.filter(user=request.user).order_by('-timestamp')
+    notifications_data = [
+        {
+            'id': notification.id,
+            'message': {
+                'sender': {
+                    'username': notification.message.sender.username
+                },
+                'content': notification.message.content
+            },
+            'is_read': notification.is_read,
+            'timestamp': notification.timestamp
+        }
+        for notification in notifications
+    ]
+    return JsonResponse(notifications_data, safe=False)
+
+
+@require_POST
+@login_required
+def mark_notification_as_read(request, notification_id):
+    notification = get_object_or_404(Notification, id=notification_id, user=request.user)
+    notification.is_read = True
+    notification.save()
+    return JsonResponse({'status': 'success'})
+
+
+@method_decorator(login_required, name='dispatch')
+class CreateNotificationView(View):
+    def post(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+        receiver_username = data.get('receiver')
+        message_content = data.get('message')
+        
+        receiver = get_object_or_404(User, username=receiver_username)
+        sender = request.user
+        
+        message = Message.objects.create(sender=sender, receiver=receiver, content=message_content)
+        
+        Notification.objects.create(user=receiver, message=message)
+        
+        return JsonResponse({'status': 'success'})
+    
+
+
+logger = logging.getLogger(__name__)
+
+@csrf_exempt
+def chat_generate_problem(request):
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        data = json.loads(request.body)
+        step = data.get('step')
+        user_message = data.get('message')
+        theme = data.get('theme')
+        difficulty = data.get('difficulty')
+
+        try:
+            if step == 1:
+                question = "Great! Now choose a difficulty: easy, medium, or hard."
+                choices = [('easy', 'Easy'), ('medium', 'Medium'), ('hard', 'Hard')]
+                return JsonResponse({'question': question, 'choices': choices})
+            elif step == 2:
+                question = f"Generating a {difficulty} difficulty problem for {theme}. Please wait..."
+                choices = []
+
+                # Generate the problem here
+                system_prompt = '''You are a romanian speaking creative informatics problem generator for highschool students.
+                                  You have to generate problems of different difficulties, offering a friendly story like problem statement, an input sample and an output sample.
+                                  You will output the problems in the following JSON format:
+                                  {
+                                    "Titlu": "titlu",
+                                    "Enunt": "enunt",
+                                    "Cerinta": "cerinta",
+                                    "Input": "input",
+                                    "Output": "output",
+                                    "Restrictii": "restrictii",
+                                    "Exemplu": "exemplu",
+                                    "Explicatie_exemplu": "explicatie"
+                                  }
+                                  You will output only the JSON, nothing more or less.
+                                  You don't have to offer explanations about the way the problem can be solved. If provided a solution, you can give a grade from 0 to 100.
+                                  The grading system is based on 3 benchmarks: correctness of the syntax, efficiency of the algorithm used, and code readability.
+                                  After grading, explain what can be improved but don't provide a correct solution.
+                                  You have to output the problems only in Romanian.'''
+
+                user_prompt = f"Please generate a {difficulty} difficulty problem related to {theme}."
+
+                client = Groq(api_key="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")
+                response = client.chat.completions.create(
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": system_prompt
+                        },
+                        {
+                            "role": "user",
+                            "content": user_prompt,
+                        }
+                    ],
+                    model="llama3-70b-8192",
+                )
+
+                generated_problem = response.choices[0].message.content if response.choices else "I couldn't generate a problem. Please try again."
+
+                problem = Problem.objects.create(
+                    text=generated_problem,
+                    # Set index or homework if needed
+                )
+
+                return JsonResponse({'question': 'Problem generated successfully!', 'choices': [], 'problem_id': problem.id})
+
+        except Exception as e:
+            logger.error("Error in chat_generate_problem: %s", str(e), exc_info=True)
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return render(request, 'problem_generator/chat_generate_problem.html', {'form': SingleDifficultyProblemGenerationForm()})

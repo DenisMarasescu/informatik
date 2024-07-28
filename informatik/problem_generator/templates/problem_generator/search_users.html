@@ -1,31 +1,110 @@
 {% extends "problem_generator/base.html" %}
 
 {% block content %}
-<h1>Search Users</h1>
+<div class="box">
+    <h1>Search Users</h1>
+    <div class="underline"></div>
 
-<!-- Search Form -->
-<form method="get" action="{% url 'search_users' %}">
-    <input type="text" name="query" placeholder="Search for users..." value="{{ request.GET.query }}">
-    <button type="submit">Search</button>
-</form>
+    <!-- Search Form -->
+    <form method="get" action="{% url 'search_users' %}" class="search-form">
+        <input type="text" name="query" placeholder="Search for users..." value="{{ request.GET.query }}" class="search-input">
+        <button type="submit" class="btn">Search</button>
+    </form>
 
-<!-- Search Results -->
-<ul>
-    {% if users %}
-        {% for user in users %}
-        <li>
-            {{ user.username }} ({{ user.email }})
-            {% if user != request.user %}
-            <form method="post" action="{% url 'send_request' user.id %}">
-                {% csrf_token %}
-                <button type="submit">Send Friend Request</button>
-            </form>
+    <!-- Search Results -->
+    {% if request.GET.query %}
+        <ul class="search-results">
+            {% if users %}
+                {% for user in users %}
+                <li class="user-item">
+                    <span>{{ user.username }} ({{ user.email }})</span>
+                    {% if user.id not in friends %}
+                    <form method="post" action="{% url 'send_request' user.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn">Send Friend Request</button>
+                    </form>
+                    {% else %}
+                    <span class="already-friends">Already Friends</span>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            {% else %}
+                <li class="no-users-found">No users found.</li>
             {% endif %}
-        </li>
-        {% endfor %}
-    {% else %}
-        <li>No users found.</li>
+        </ul>
     {% endif %}
-</ul>
+</div>
 
+<style>
+    .search-form {
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .search-input {
+        flex-grow: 1;
+        padding: 0.5rem 1rem;
+        border-radius: 0.4rem;
+        border: 1px solid #ddd;
+    }
+
+    .search-results {
+        list-style: none;
+        padding-left: 0;
+    }
+
+    .user-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .user-item span {
+        flex-grow: 1;
+    }
+
+    .btn {
+        padding: 0.5rem 1rem;
+        background-color: var(--albastru);
+        color: white;
+        border: none;
+        border-radius: 0.4rem;
+        cursor: pointer;
+    }
+
+    .btn:hover {
+        background-color: #357ae8;
+    }
+
+    .already-friends {
+        color: #888;
+    }
+
+    .no-users-found {
+        padding: 1rem;
+        text-align: center;
+        color: #888;
+    }
+
+    /* Dark mode styles */
+    .darkmode--activated .search-input {
+        background-color: #333;
+        color: white;
+        border: 1px solid #555;
+    }
+
+    .darkmode--activated .user-item {
+        background-color: #333;
+        color: white;
+        border: 1px solid #555;
+    }
+
+    .darkmode--activated .user-item:hover {
+        background-color: #444;
+    }
+</style>
 {% endblock %}

@@ -30,6 +30,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     school = models.CharField(max_length=255, null=True, blank=True)  # Optional field for profesor
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    bio = models.TextField(blank=True)
+    profile_picture = models.ImageField(upload_to='profile_pics/', blank=True)
+    social_links = models.JSONField(default=dict, blank=True)
+    badges = models.ManyToManyField('Badge', related_name='users', blank=True)
+
 
     objects = MyUserManager()
 
@@ -38,6 +43,16 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+    
+class Badge(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    image = models.ImageField(upload_to='badge_images/')
+    criteria = models.CharField(max_length=255, blank=True)  # e.g., 'solved_problems_100'
+
+    def __str__(self):
+        return self.name
+
 
 
 class Friendship(models.Model):
@@ -136,6 +151,17 @@ class Message(models.Model):
     receiver = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='received_messages', on_delete=models.CASCADE)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)  # Added field
 
     def __str__(self):
         return f"Message from {self.sender} to {self.receiver} at {self.timestamp}"
+    
+
+class Notification(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications')
+    message = models.OneToOneField(Message, on_delete=models.CASCADE, related_name='notification')
+    is_read = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Notification for {self.user} about message from {self.message.sender} at {self.timestamp}"

@@ -109,15 +109,14 @@
         font-size: 0.8rem;
     }
 
-    
 </style>
 
 <div class="box profile-box">
     <div class="profile-header">
-        <h1 class="textMare">{{ user.username }}</h1>
+        <h1 class="textMare">{{ user_profile.username }}</h1>
         <div class="profile-picture">
-            {% if user.profile_picture %}
-                <img src="{{ user.profile_picture.url }}" alt="Profile Picture">
+            {% if user_profile.profile_picture %}
+                <img src="{{ user_profile.profile_picture.url }}" alt="Profile Picture">
             {% else %}
                 <div class="placeholder-picture"></div>
             {% endif %}
@@ -127,90 +126,30 @@
     <div class="margin flexx profile-content">
         <div class="half profile-info">
             <h2>Profile Information</h2>
-            <p><i class="material-icons">email</i><strong>Email:</strong> {{ user.email }}</p>
-            <p><i class="material-icons">person</i><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
-            <p><i class="material-icons">school</i><strong>School:</strong> {{ user.school }}</p>
-            <p><i class="material-icons">info</i><strong>Bio:</strong> {{ user.bio }}</p>
+            <p><i class="material-icons">email</i><strong>Email:</strong> {{ user_profile.email }}</p>
+            <p><i class="material-icons">person</i><strong>Name:</strong> {{ user_profile.first_name }} {{ user_profile.last_name }}</p>
+            <p><i class="material-icons">school</i><strong>School:</strong> {{ user_profile.school }}</p>
+            <p><i class="material-icons">info</i><strong>Bio:</strong> {{ user_profile.bio }}</p>
             <p><i class="material-icons">link</i><strong>Social Links:</strong></p>
             <ul>
-                {% for key, value in user.social_links.items %}
+                {% for key, value in user_profile.social_links.items %}
                     <li><i class="material-icons">link</i><a href="{{ value }}" target="_blank">{{ value }}</a></li>
                 {% endfor %}
             </ul>
-            <a href="{% url 'edit_profile' %}" class="btn">Edit Profile</a>
         </div>
 
         <div class="half profile-requests">
-            <h2>Friend Requests</h2>
-            <div class="friend-requests">
-                <h3>Received Requests</h3>
-                <ul>
-                    {% for friend_request in received_requests %}
-                    <li>
-                        {{ friend_request.sender.username }}
-                        <form method="post" action="{% url 'accept_friend_request' friend_request.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn small-btn">Accept Friend Request</button>
-                        </form>
-                    </li>
-                    {% endfor %}
-                </ul>
-
-                <h3>Sent Requests</h3>
-                <ul>
-                    {% for friend_request in sent_requests %}
-                    <li>
-                        {{ friend_request.receiver.username }}
-                        <span class="pending-request">(Pending)</span>
-                    </li>
-                    {% endfor %}
-                </ul>
+            <h2>Friends</h2>
+            <div class="friend-list">
+                {% for friend in friends %}
+                <a href="/profile/{{ friend.username }}"><div class="friend-item">
+                    <span>{{ friend.username }}</span>
+                </div></a>
+                {% endfor %}
             </div>
         </div>
-    </div>
-
-    <div class="underline"></div>
-
-    <div class="box profile-friends">
-        <h2>Friends</h2>
-        <div class="friend-list" id="friend-list_2">
-            {% for friend in friends|slice:":10" %}
-            <a href="/profile/{{ friend.username }}"><div class="friend-item">
-                <span>{{ friend.username }}</span>
-            </div></a>
-            {% endfor %}
-        </div>
-        {% if friends|length > 10 %}
-        <button id="show-more-btn" class="btn" onclick="showMoreFriends()">Show More</button>
-        {% endif %}
-    </div>
-
-    <div class="underline"></div>
-
-    <div class="box profile-performance">
-        <h2>Performance Chart</h2>
-        {% if chart_url %}
-        <img src="{{ chart_url }}" alt="User Grades Over Time" class="full">
-        {% else %}
-        <p>No grades available to display.</p>
-        {% endif %}
     </div>
 </div>
-
-<script>
-    function showMoreFriends() {
-        document.getElementById('friend-list_2').innerHTML = `
-            {% for friend in friends %}
-            <div class="friend-item">
-                <span>{{ friend.username }}</span>
-            </div>
-            {% endfor %}
-        `;
-        document.getElementById('show-more-btn').style.display = 'none';
-    }
-</script>
-
-
 
 <!-- Google Fonts Icons -->
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">

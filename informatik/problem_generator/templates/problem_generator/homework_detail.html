@@ -1,10 +1,8 @@
 {% extends "problem_generator/base.html" %}
 {% load custom_filters %}
-{%load static%}
-
+{% load static %}
 
 {% block content %}
-
     <div class="box">
         <h1>Tema: {{ homework.title }}</h1>
         <p>Termen limita: {{ homework.deadline }}</p>
@@ -13,9 +11,8 @@
         <ul>
             {% for problem in homework.probleme.all %}
             <li>
-                <!-- {{ problem.text }} -->
                 <a href="{% url 'problem_detail' problem.id %}">Problema {{ forloop.counter }}</a>: {{ problem.text|truncatewords:10 }}
-                {% if is_profesor %}
+                {% if is_teacher %}
                     <h3>Solutii pentru problema:</h3>
                     <ul>
                         {% for solution in problem.solutions.all %}
@@ -34,145 +31,51 @@
 
     <div class="box">
         <h2>Grile:</h2>
-    <form method="post" action="{% url 'submit_homework' homework.id %}">
-        {% csrf_token %}
-        {% for mc_problem in homework.multiple_choice_problems.all %}
-        <div>
+        <form method="post" action="{% url 'submit_homework' homework.id %}">
+            {% csrf_token %}
+            {% for mc_problem in homework.multiple_choice_problems.all %}
+            <div>
                 <div class="box">
-                <p class="enuntQuiz">{{ mc_problem.question }}</p>
-                {% for choice in mc_problem.choices %}
-                    <label>
-                        <!-- Extract the letter and text for the choice -->
-                        <input type="radio" name="question_{{ mc_problem.id }}" value="{{ choice|slice:':1' }}">
-                        {{ choice|slice:'3:' }}
-                    </label><br>
-                {% endfor %}
+                    <p class="enuntQuiz">{{ mc_problem.question }}</p>
+                    {% for choice in mc_problem.choices %}
+                        <label>
+                            <input type="radio" name="question_{{ mc_problem.id }}" value="{{ choice|slice:':1' }}">
+                            {{ choice|slice:'3:' }}
+                        </label><br>
+                    {% endfor %}
+                </div>
             </div>
-        </div>
-        {% empty %}
-        <p>Nu au fost adaugate solutii pentru grila pana in acest moment.</p>
-        {% endfor %}
-        <input type="submit" value="Trimite raspunsurile" class="btn">
-    </form>
-    {% if user.is_profesor %}
-    <h2>Note si Solutii Incarcate</h2>
-    {% if mcq_results %}
-        <table>
-            <!-- <thead>
-                <tr>
-                    <th>Student</th>
-                    <th>Correct Answers</th>
-                    <th>Total Questions</th>
-                    <th>Grade</th>
-                </tr>
-            </thead> -->
-            <tbody>
-                {% if is_teacher %}
-                    <h3>Solutiile Elevilor:</h3>
-                    <ul>
-                    {% for submission in submissions %}
-                        <li>
-                            {{ submission.student.username }}: {{ submission.correct_answers }}/{{ submission.total_questions }} correct answers. Grade: {{ submission.grade }}%
-                        </li>
+            {% empty %}
+            <p>Nu au fost adaugate solutii pentru grila pana in acest moment.</p>
+            {% endfor %}
+            <input type="submit" value="Trimite raspunsurile" class="btn">
+        </form>        
+        {% if is_teacher %}
+        <h2>Note si Solutii Incarcate</h2>
+        {% if mcq_results %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Elev</th>
+                        <th>Raspunsuri corecte</th>
+                        <th>Total intrebari</th>
+                        <th>Nota (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for submission in mcq_results %}
+                        <tr>
+                            <td>{{ submission.student.username }}</td>
+                            <td>{{ submission.correct_answers }}</td>
+                            <td>{{ submission.total_questions }}</td>
+                            <td>{{ submission.grade }}%</td>
+                        </tr>
                     {% endfor %}
-                    </ul>
-                {% endif %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>Nu au fost incarcate solutii inca.</p>
-    {% endif %}
-{% endif %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Nu au fost incarcate solutii inca.</p>
+        {% endif %}
+        {% endif %}
     </div>
-
 {% endblock content %}
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Homework Details</title>
-</head>
-<body>
-    
-    <h1>Homework: {{ homework.title }}</h1>
-    <p>{{ homework.description }}</p>
-    <p>Deadline: {{ homework.deadline }}</p>
-
-    <h2>Problems:</h2>
-    <ul>
-        {% for problem in homework.probleme.all %}
-        <li>
-            {{ problem.text }}
-            <a href="{% url 'problem_detail' problem.id %}">Problem {{ forloop.counter }}</a>: {{ problem.text|truncatewords:10 }}
-            {% if is_profesor %}
-                <h3>Solutions for this problem:</h3>
-                <ul>
-                    {% for solution in problem.solutions.all %}
-                    <li>{{ solution.student.username }}: Grade - {{ solution.grade }}</li>
-                    {% empty %}
-                    <li>No solutions submitted yet.</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-        </li>
-        {% empty %}
-        <li>No problems have been added yet.</li>
-        {% endfor %}
-    </ul>
-
-    <h2>Multiple Choice Questions:</h2>
-    <form method="post" action="{% url 'submit_homework' homework.id %}">
-        {% csrf_token %}
-        {% for mc_problem in homework.multiple_choice_problems.all %}
-        <div>
-            <fieldset>
-                <legend>{{ mc_problem.question }}</legend>
-                {% for choice in mc_problem.choices %}
-                    <label>
-                        <!-- Extract the letter and text for the choice -->
-                        <input type="radio" name="question_{{ mc_problem.id }}" value="{{ choice|slice:':1' }}">
-                        {{ choice|slice:'3:' }}
-                    </label><br>
-                {% endfor %}
-            </fieldset>
-        </div>
-        {% empty %}
-        <p>No multiple choice questions have been added yet.</p>
-        {% endfor %}
-        <input type="submit" value="Submit Answers" class="btn">
-    </form>
-    {% if user.is_profesor %}
-    <h2>Submitted Solutions and Grades</h2>
-    {% if mcq_results %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Student</th>
-                    <th>Correct Answers</th>
-                    <th>Total Questions</th>
-                    <th>Grade</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if is_teacher %}
-                    <h3>Student Submissions:</h3>
-                    <ul>
-                    {% for submission in submissions %}
-                        <li>
-                            {{ submission.student.username }}: {{ submission.correct_answers }}/{{ submission.total_questions }} correct answers. Grade: {{ submission.grade }}%
-                        </li>
-                    {% endfor %}
-                    </ul>
-                {% endif %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>No solutions have been submitted yet.</p>
-    {% endif %}
-{% endif %}
-
-
-</body>
-</html>

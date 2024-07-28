@@ -2,6 +2,7 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth import get_user_model
 from asgiref.sync import sync_to_async
+from channels.layers import get_channel_layer
 from accounts.models import Message
 
 User = get_user_model()
@@ -47,6 +48,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
         )
 
+        # Send notification to the receiver
+        await self.channel_layer.group_send(
+            f'notifications_{self.friend_username}',
+            {
+                'type': 'notify',
+                'message': {
+                    'type': 'notification',
+                    'message': f'New message from {sender_username}'
+                }
+            }
+        )
+
     async def chat_message(self, event):
         message = event['message']
         sender = event['sender']
@@ -56,6 +69,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'message': message,
             'sender': sender
         }))
+
+    async def notify(self, event):
+        message = event['message']
+
+        # Send notification to WebSocket
+        await self.send(text_data=json.dumps(message))
 
     @sync_to_async
     def get_user(self, username):

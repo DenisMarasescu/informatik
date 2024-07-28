@@ -1,0 +1,184 @@
+{% extends "problem_generator/base.html" %}
+{% block content %}
+
+<style>
+    .chat-container-2 {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 2rem;
+    }
+    .chat-window-2 {
+        width: 80%;
+        /* max-width: 600px; */
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background-color: #fff;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .darkmode--activated .chat-window-2{
+        background-color: #232323;
+    }
+
+    .chat-body-2 {
+        flex: 1;
+        padding: 1rem;
+        overflow-y: auto;
+    }
+    .chat-footer-2 {
+        display: flex;
+        padding: 1rem;
+        border-top: 1px solid #ccc;
+    }
+    .chat-input-2 {
+        flex: 1;
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    .chat-send-2 {
+        margin-left: 0.5rem;
+        padding: 0.5rem 1rem;
+        background-color: var(--albastru);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .message {
+        margin-bottom: 1rem;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+    }
+    .message.user {
+        background-color: #e1ffc7;
+        align-self: flex-end;
+    }
+    .message.bot {
+        background-color: #f0f0f0;
+        align-self: flex-start;
+    }
+
+    .darkmode--activated .message.bot{
+        background-color: #333333;
+        color: white;
+    }
+
+    .darkmode--activated .message.user{
+        background-color: #305f53;
+    }
+
+    .options-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.choice-button {
+    background-color: var(--albastru);
+    color: white;
+    border: 2px solid;
+    border-radius: 5px;
+    padding: 10px 20px;
+    margin: 0.2rem 0.2rem;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.choice-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-3px);
+}
+
+.choice-button:active {
+    background-color: #003d80;
+}
+</style>
+
+<div class="chat-container-2">
+    <div id="chat-window-2" class="chat-window-2">
+        <div id="chat-body-2" class="chat-body-2"></div>
+        <div class="chat-footer-2">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            <input type="text" id="chat-input-2" class="chat-input-2" placeholder="Type your message here..." style="display:none;">
+            <button id="chat-send-2" class="chat-send-2" style="display:none;">Send</button>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+<!-- <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatInput = document.getElementById('chat-input');
+        const chatSend = document.getElementById('chat-send');
+        const chatBody = document.getElementById('chat-body');
+
+        console.log('DOM fully loaded and parsed');  // Debugging
+
+        let step = 1;
+        let theme = null;
+        let difficulty = null;
+
+        function sendMessage(message, sender = 'user') {
+            console.log(`Sending message: ${message}, Sender: ${sender}`);  // Debugging
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', sender);
+            messageElement.textContent = message;
+            chatBody.appendChild(messageElement);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        async function fetchResponse(message) {
+            console.log(`Fetching response for message: ${message}, Step: ${step}, Theme: ${theme}, Difficulty: ${difficulty}`);  // Debugging
+            const response = await fetch("{% url 'chat_generate_problem' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ step, message, theme, difficulty })
+            });
+            console.log(`Response status: ${response.status}`);  // Debugging
+            return response.json();
+        }
+
+        async function handleMessage() {
+            const userMessage = chatInput.value.trim();
+            if (!userMessage) return;
+
+            sendMessage(userMessage, 'user');
+            chatInput.value = '';
+            step += 1;
+
+            const response = await fetchResponse(userMessage);
+            console.log(`Server response: `, response);  // Debugging
+
+            sendMessage(response.question, 'bot');
+            if (response.choices.length > 0) {
+                const choicesMessage = response.choices.map(choice => `${choice[1]} (${choice[0]})`).join(', ');
+                sendMessage(choicesMessage, 'bot');
+            }
+
+            // Save responses for later steps
+            if (step == 2) theme = userMessage;
+            if (step == 3) difficulty = userMessage;
+        }
+
+        chatSend.addEventListener('click', handleMessage);
+        chatInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                handleMessage();
+            }
+        });
+
+        // Initial message
+        sendMessage("Welcome! Let's generate a problem. What theme would you like to choose?", 'bot');
+    });
+</script> -->
+

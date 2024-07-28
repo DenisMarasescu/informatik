@@ -5,71 +5,296 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Your Site Title{% endblock %}</title>
-    <link rel="stylesheet" href="{%static 'problem_generator/css/style.css'%}">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'problem_generator/css/style.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/@mojs/core"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
     <script>
-    function addDarkmodeWidget() {
-        const options = {
-            bottom: '64px', // position of the widget
-            right: '3rem',
-            left: 'unset',
-            time: '0.5s', // transition time
-            mixColor: '#fff', // default color
-            backgroundColor: '#fff',  
-            buttonColorDark: '#100f2c',  
-            buttonColorLight: '#fff',
-            saveInCookies: true, // whether to save the theme in cookies
-            label: '🌓', // label for the toggle button
-            autoMatchOsTheme: true // automatically match OS theme
-        };
+        function addDarkmodeWidget() {
+            const options = {
+                bottom: '160px', // position of the widget
+                right: '20px',
+                left: 'unset',
+                width: '60px', 
+                height: '60px',
+                time: '0.5s', // transition time
+                mixColor: '#fff', // default color
+                backgroundColor: '#fff',  
+                buttonColorDark: '#100f2c',  
+                buttonColorLight: '#fff',
+                saveInCookies: true, // whether to save the theme in cookies
+                label: '🌓', // label for the toggle button
+                autoMatchOsTheme: true // automatically match OS theme
+            };
 
-        const darkmode = new Darkmode(options);
-        darkmode.showWidget();
+            const darkmode = new Darkmode(options);
+            darkmode.showWidget();
 
-        // Increase z-index after widget is shown
-        document.addEventListener("DOMContentLoaded", function() {
-            var widget = document.querySelector('.darkmode-toggle');
-            if (widget) {
-                widget.style.zIndex = '9999'; // Ensure it's above other elements
-            }
+            // Increase z-index after widget is shown
+            document.addEventListener("DOMContentLoaded", function() {
+                var widget = document.querySelector('.darkmode-toggle');
+                if (widget) {
+                    widget.style.zIndex = '9999'; // Ensure it's above other elements
+                }
+            });
+        }
+        window.addEventListener('load', addDarkmodeWidget);
+
+        function updateSvgIcons() {
+            var isDarkMode = document.body.classList.contains('dark-mode');
+            var icons = document.querySelectorAll('.nav-icon'); // Assign a common class 'nav-icon' to your img elements.
+
+            icons.forEach(function(icon) {
+                var src = icon.getAttribute('src');
+                if (isDarkMode) {
+                    icon.setAttribute('src', src.replace('.svg', '_alb.svg'));
+                } else {
+                    icon.setAttribute('src', src.replace('_alb.svg', '.svg'));
+                }
+            });
+        }
+
+        // Assuming darkmode.js toggles a class on the body
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.attributeName === "class") {
+                    updateSvgIcons();
+                }
+            });
         });
-    }
-    window.addEventListener('load', addDarkmodeWidget);
 
+        observer.observe(document.body, { attributes: true });
 
-    function updateSvgIcons() {
-    var isDarkMode = document.body.classList.contains('dark-mode');
-    var icons = document.querySelectorAll('.nav-icon'); // Assign a common class 'nav-icon' to your img elements.
-
-    icons.forEach(function(icon) {
-      var src = icon.getAttribute('src');
-      if (isDarkMode) {
-        icon.setAttribute('src', src.replace('.svg', '_alb.svg'));
-      } else {
-        icon.setAttribute('src', src.replace('_alb.svg', '.svg'));
-      }
-    });
-  }
-
-  // Assuming darkmode.js toggles a class on the body
-  var observer = new MutationObserver(function(mutations) {
-    mutations.forEach(function(mutation) {
-      if (mutation.attributeName === "class") {
+        // Call the function initially if dark mode is default
         updateSvgIcons();
-      }
-    });
-  });
-
-  observer.observe(document.body, { attributes: true });
-
-  // Call the function initially if dark mode is default
-  updateSvgIcons();
-
     </script>
+    <style>
 
+        .darkmode-toggle {
+            position: fixed;
+            bottom: 140px; /* Adjust this value as needed */
+            right: 20px; /* Same as chat icon */
+            z-index: 1000; /* Ensure it's on top */
+            width: 60px !important;
+            height: 60px !important;
+        }
+        /* Floating chat icon */
+        #chat-icon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            text-align: center;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        /* AI Tutor icon */
+        #ai-tutor-icon {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            text-align: center;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        /* Friend list container */
+        #friend-list {
+            display: none;
+            position: fixed;
+            bottom: 160px;
+            right: 20px;
+            width: 250px;
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            z-index: 1000;
+        }
+
+        #friend-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #friend-list li {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        #friend-list li:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Chat window container */
+        .chat-window {
+            display: none;
+            position: fixed;
+            bottom: 5rem;
+            right: 10rem;
+            width: 20rem;
+            height: 25rem;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            z-index: 1000;
+        }
+
+        .chat-window-header {
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .chat-window-body {
+            padding: 10px;
+            height: calc(100% - 80px);
+            overflow-y: auto;
+        }
+
+        .chat-window-footer {
+            display: flex;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .chat-window-footer textarea {
+            flex-grow: 1;
+            /* height: 50px; */
+        }
+
+        .chat-window-footer button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .chat-input{
+            resize: none;
+            height: 2rem;
+        }
+
+        /* AI Tutor container */
+        #ai-tutor-container {
+            display: none;
+            position: fixed;
+            bottom: 5rem;
+            right: 10rem;
+            width: 30rem;
+            height: 30rem;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            z-index: 1001;
+        }
+
+        #ai-tutor-chat {
+            padding: 10px;
+            height: calc(100% - 60px);
+            overflow-y: auto;
+        }
+
+        #ai-tutor-footer {
+            display: flex;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 0 0 10px 10px;
+        }
+
+        #ai-tutor-input {
+            flex-grow: 1;
+            height: 50px;
+        }
+
+        #ai-tutor-send {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        /* Chat message styles */
+        .message {
+            margin: 10px 0;
+            padding: 5px 10px;
+            border-radius: 10px;
+        }
+
+        .message.sent {
+            background-color: #e1ffc7;
+            align-self: flex-end;
+        }
+
+        .message.received {
+            background-color: #f0f0f0;
+            align-self: flex-start;
+        }
+
+        .message .sender {
+            font-weight: bold;
+        }
+
+        .message .content {
+            margin-top: 5px;
+        }
+        
+        .message.typing .content {
+            font-style: italic;
+            color: #888;
+        }
+
+        .chat-window, #ai-tutor-container {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            transform: translateY(100%);
+            opacity: 0;
+        }
+
+        .chat-window.open, #ai-tutor-container.open {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        #ai-tutor-container {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            transform: translateY(100%);
+            opacity: 0;
+        }
+
+        #ai-tutor-container.open {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
 </head>
 <body>
     <div id="loadingOverlay" style="display: none;">
@@ -79,26 +304,461 @@
         <div class="sidebar">
             <h1 id="logo">Evalu<span class="colorBlue">AI</span></h1>
             <nav>
-                <a href="{%url 'my_courses'%}" class="{% if active_section == 'class' %}active{% endif %}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="23.559" viewBox="0 0 24 23.559">
-                    <g id="noun-home-6433807" transform="translate(-1.588 -1.69)">
-                      <path id="Path_2901" data-name="Path 2901" d="M13.588,1.69a1.838,1.838,0,0,0-1.232.47L2.627,10.916a3.14,3.14,0,0,0-1.039,2.333V23.534A1.723,1.723,0,0,0,3.3,25.249H23.873a1.723,1.723,0,0,0,1.714-1.714V13.249a3.14,3.14,0,0,0-1.039-2.333L14.82,2.159A1.838,1.838,0,0,0,13.588,1.69Zm0,1.138a.7.7,0,0,1,.468.182l9.729,8.757a1.993,1.993,0,0,1,.661,1.482V23.534a.563.563,0,0,1-.571.571H17.159V16.677a1.723,1.723,0,0,0-1.714-1.714H11.73a1.723,1.723,0,0,0-1.714,1.714v7.429H3.3a.563.563,0,0,1-.571-.571V13.249a1.993,1.993,0,0,1,.661-1.482L13.12,3.01A.7.7,0,0,1,13.588,2.828ZM11.73,16.106h3.714a.563.563,0,0,1,.571.571v7.429H11.159V16.677A.563.563,0,0,1,11.73,16.106Z" transform="translate(0 0)" fill="#000634"/>
-                    </g>
-                  </svg>Clase</a>
-                <a href="{%url 'generate_problem'%}" class="{% if active_section == 'problems' %}active{% endif %}"><img src="{%static 'problem_generator/assets/settings.svg'%}" alt="">Probleme</a>
-                <!-- <a href="" class="{% if active_section == 'social' %}active{% endif %}"><img src="{%static 'problem_generator/assets/social_alb.svg'%}" alt="">Social</a> -->
-                <a href="{% url 'profile' %}">Profile</a>
-              </nav>
+                <a href="{% url 'my_courses' %}" class="{% if active_section == 'class' %}active{% endif %}">
+                    <span class="material-icons nav-icon">class</span> Clase
+                </a>
+                <a href="{% url 'chat_generate_problem' %}" class="{% if active_section == 'problems' %}active{% endif %}">
+                    <span class="material-icons nav-icon">code</span> Probleme
+                </a>
+                <a href="{% url 'profile' %}">
+                    <span class="material-icons nav-icon">person</span> Profile
+                </a>
+                <a href="{% url 'leaderboard' %}">
+                    <span class="material-icons nav-icon">leaderboard</span> Leaderboard
+                </a>
+                <a href="{% url 'search_users' %}"><span class="material-icons nav-icon">group_add</span> Find friends</a>
+            </nav>
         </div>
         <div class="postSide">
             <div class="topbar">
-                <h2>{{page_title}}</h2>
+                <h2>{{ page_title }}</h2>
             </div>
             <div class="container">
                 {% block content %}
-                
                 {% endblock content %}
             </div>
         </div>
     </div>
+
+    <button id="chat-icon" onclick="toggleFriendList()">💬</button>
+    <button id="ai-tutor-icon" onclick="toggleAITutor()">🤖</button>
+
+    <div id="notifications-container">
+        <button id="notifications-icon" onclick="toggleNotifications()">
+            <span class="material-icons">notifications</span> (<span id="unread-count">0</span>)
+        </button>
+        <div id="notifications-list">
+            <ul id="notifications"></ul>
+        </div>
+    </div>
+    
+
+    <!-- Friend list container -->
+    <div id="friend-list">
+        <ul>
+            {% for friend in friends %}
+            <li onclick="openChat('{{ friend.username }}')">{{ friend.username }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Chat windows container -->
+    <div id="chat-windows"></div>
+
+    <!-- AI Tutor container -->
+    <div id="ai-tutor-container">
+        <div id="ai-tutor-chat"></div>
+        <div id="ai-tutor-footer">
+            <input type="text" id="ai-tutor-input" placeholder="Ask a question...">
+            <button id="ai-tutor-send" onclick="sendAIQuery()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        let chatSockets = {};
+
+        function toggleFriendList() {
+            const friendList = document.getElementById('friend-list');
+            if (friendList.style.display === 'none' || friendList.style.display === '') {
+                friendList.style.display = 'block';
+                friendList.classList.add('open'); // Add this line
+            } else {
+                friendList.classList.remove('open'); // Add this line
+                setTimeout(() => {
+                    friendList.style.display = 'none';
+                }, 50); // Match this duration with the CSS transition time
+            }
+        }
+
+        function toggleAITutor() {
+            const tutorContainer = document.getElementById('ai-tutor-container');
+            if (tutorContainer.style.display === 'none' || tutorContainer.style.display === '') {
+                tutorContainer.style.display = 'block';
+                setTimeout(() => {
+                    tutorContainer.classList.add('open'); // Add this line
+                }, 10); // Small timeout to trigger the animation
+            } else {
+                tutorContainer.classList.remove('open'); // Add this line
+                setTimeout(() => {
+                    tutorContainer.style.display = 'none';
+                }, 300); // Match this duration with the CSS transition time
+            }
+        }
+
+        function appendAITypingIndicator(chatContainer) {
+            const typingIndicator = document.createElement('div');
+            typingIndicator.classList.add('message', 'received');
+            typingIndicator.id = 'ai-typing-indicator';
+            typingIndicator.innerHTML = `<div class="content">AI is typing...</div>`;
+            chatContainer.appendChild(typingIndicator);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function removeAITypingIndicator(chatContainer) {
+            const typingIndicator = document.getElementById('ai-typing-indicator');
+            if (typingIndicator) {
+                chatContainer.removeChild(typingIndicator);
+            }
+        }
+
+        function openChat(friendUsername) {
+            // Check if the chat window already exists
+            let chatWindow = document.getElementById('chat-window-' + friendUsername);
+            if (!chatWindow) {
+                // Create a new chat window
+                chatWindow = document.createElement('div');
+                chatWindow.className = 'chat-window';
+                chatWindow.id = 'chat-window-' + friendUsername;
+
+                chatWindow.innerHTML = `
+                    <div class="chat-window-header">
+                        ${friendUsername}
+                        <span class="close-btn" onclick="closeChat('${friendUsername}')">✖</span>
+                    </div>
+                    <div class="chat-window-body" id="chat-body-${friendUsername}"></div>
+                    <div class="chat-window-footer">
+                        <textarea class="chat-input" id="chat-input-${friendUsername}"></textarea>
+                        <button onclick="sendMessage('${friendUsername}')">Send</button>
+                    </div>
+                `;
+
+                document.getElementById('chat-windows').appendChild(chatWindow);
+                
+                // Add event listener for Enter key press
+                const chatInput = document.getElementById('chat-input-' + friendUsername);
+                chatInput.addEventListener('keydown', function(event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault(); // Prevent newline
+                        sendMessage(friendUsername);
+                    }
+                });
+
+                // Fetch past messages
+                fetch(`/messages/${friendUsername}/`)
+                    .then(response => response.json())
+                    .then(messages => {
+                        const chatBody = document.getElementById('chat-body-' + friendUsername);
+                        messages.forEach(data => {
+                            const isSender = data.sender === '{{ user.username }}';
+                            const senderName = isSender ? 'You' : data.sender;
+                            const messageElement = document.createElement('div');
+                            messageElement.classList.add('message', isSender ? 'sent' : 'received');
+                            messageElement.innerHTML = `<div class="sender">${senderName}</div><div class="content">${data.content}</div>`;
+                            chatBody.appendChild(messageElement);
+                        });
+                        chatBody.scrollTop = chatBody.scrollHeight; // Auto-scroll to the bottom
+                    });
+
+                // Connect to the WebSocket
+                connectToChat(friendUsername);
+            }
+
+            // Show the chat window
+            chatWindow.style.display = 'block';
+            setTimeout(() => {
+                chatWindow.classList.add('open'); // Add this line
+            }, 10); // Small timeout to trigger the animation
+        }
+
+        function connectToChat(friendUsername) {
+            const chatBody = document.getElementById('chat-body-' + friendUsername);
+
+            if (chatSockets[friendUsername]) {
+                chatSockets[friendUsername].close();
+            }
+
+            chatSockets[friendUsername] = new WebSocket(
+                'ws://' + window.location.host + '/ws/chat/' + friendUsername + '/'
+            );
+
+            chatSockets[friendUsername].onmessage = function(e) {
+                const data = JSON.parse(e.data);
+                const isSender = data.sender === '{{ user.username }}';
+                const senderName = isSender ? 'You' : data.sender;
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', isSender ? 'sent' : 'received');
+                messageElement.innerHTML = `<div class="sender">${senderName}</div><div class="content">${data.message}</div>`;
+                chatBody.appendChild(messageElement);
+                chatBody.scrollTop = chatBody.scrollHeight; // Auto-scroll to the bottom
+            };
+
+            chatSockets[friendUsername].onclose = function(e) {
+                console.error('Chat socket closed unexpectedly');
+                // Attempt to reconnect after a delay
+                setTimeout(() => {
+                    if (!chatSockets[friendUsername] || chatSockets[friendUsername].readyState === WebSocket.CLOSED) {
+                        connectToChat(friendUsername);
+                    }
+                }, 5000);
+            };
+        }
+
+        function closeChat(friendUsername) {
+            const chatWindow = document.getElementById('chat-window-' + friendUsername);
+            if (chatSockets[friendUsername]) {
+                chatSockets[friendUsername].close();
+                delete chatSockets[friendUsername];
+            }
+            if (chatWindow) {
+                chatWindow.classList.remove('open'); // Add this line
+                setTimeout(() => {
+                    chatWindow.style.display = 'none';
+                }, 300); // Match this duration with the CSS transition time
+            }
+        }
+
+        function sendMessage(friendUsername) {
+            const chatInput = document.getElementById('chat-input-' + friendUsername);
+            const message = chatInput.value;
+            if (message.trim() === '' || !chatSockets[friendUsername]) return;
+
+            chatSockets[friendUsername].send(JSON.stringify({
+                'message': message,
+                'sender': '{{ user.username }}'
+            }));
+
+            // Create a notification for the receiver
+            fetch('/notifications/create/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    'receiver': friendUsername,
+                    'message': message
+                })
+            });
+
+            chatInput.value = '';
+        }
+
+        function appendMessageToChat(chatContainer, message, messageType, senderName) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', messageType);
+            messageElement.innerHTML = `<div class="sender">${senderName}</div><div class="content">${message}</div>`;
+            chatContainer.appendChild(messageElement);
+        }
+
+        async function sendAIQuery() {
+            const queryInput = document.getElementById('ai-tutor-input');
+            const query = queryInput.value;
+            if (!query.trim()) return;
+
+            const chatContainer = document.getElementById('ai-tutor-chat');
+            appendMessageToChat(chatContainer, query, 'sent', 'You');
+            appendAITypingIndicator(chatContainer);
+            queryInput.value = '';
+
+            const response = await fetch('/ai-tutor/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ query })
+            });
+
+            const result = await response.json();
+            removeAITypingIndicator(chatContainer);
+            appendMessageToChat(chatContainer, result.response, 'received', 'AI');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+
+        // Inside the <script> tag in base.html
+
+        function toggleNotifications() {
+            const notificationsList = document.getElementById('notifications-list');
+            if (notificationsList.style.display === 'none' || notificationsList.style.display === '') {
+                notificationsList.style.display = 'block';
+            } else {
+                notificationsList.style.display = 'none';
+            }
+        }
+
+        // Example function to add a notification
+function addNotification(message, isUnread = false) {
+    const notificationsList = document.getElementById('notifications');
+    const newNotification = document.createElement('li');
+    if (isUnread) {
+        newNotification.classList.add('unread');
+    }
+
+    const notificationContent = document.createElement('div');
+    notificationContent.classList.add('notification-content');
+
+    const icon = document.createElement('span');
+    icon.classList.add('material-icons');
+    icon.textContent = 'notifications'; // Change icon based on notification type
+
+    const text = document.createElement('p');
+    text.classList.add('notification-text');
+    text.textContent = message;
+
+    notificationContent.appendChild(icon);
+    notificationContent.appendChild(text);
+
+    const timestamp = document.createElement('span');
+    timestamp.classList.add('notification-timestamp');
+    timestamp.textContent = 'Just now'; // Update with actual timestamp
+
+    newNotification.appendChild(notificationContent);
+    newNotification.appendChild(timestamp);
+
+    notificationsList.prepend(newNotification);
+}
+
+        async function fetchNotifications() {
+            const response = await fetch('/notifications/');
+            const notifications = await response.json();
+            const notificationsContainer = document.getElementById('notifications');
+            const unreadCount = document.getElementById('unread-count');
+            
+            notificationsContainer.innerHTML = '';
+            let unread = 0;
+            
+            notifications.forEach(notification => {
+                if (!notification.is_read) {
+                    unread++;
+                }
+                const notificationElement = document.createElement('li');
+                notificationElement.innerHTML = `<span class="material-icons">message</span><div class="notification-content">${notification.message.sender.username} sent you a message: "${notification.message.content}"</div> <a href="#" onclick="markAsRead(${notification.id})">Mark as read</a>`;
+                notificationsContainer.appendChild(notificationElement);
+            });
+            
+            unreadCount.textContent = unread;
+        }
+
+        async function markAsRead(notificationId) {
+            await fetch(`/notifications/mark_as_read/${notificationId}/`, { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' } });
+            fetchNotifications();
+        }
+
+        window.onload = function() {
+            fetchNotifications();
+            setInterval(fetchNotifications, 60000); // Refresh notifications every minute
+        };
+        
+
+        const notificationSocket = new WebSocket(
+            'ws://' + window.location.host + '/ws/notifications/'
+        );
+
+        notificationSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            if (data.type === 'notification') {
+                // Update the notification UI
+                const notificationCount = document.getElementById('notification-count');
+                notificationCount.textContent = parseInt(notificationCount.textContent) + 1;
+                const notificationList = document.getElementById('notification-list');
+                const newNotification = document.createElement('li');
+                newNotification.textContent = data.message;
+                notificationList.appendChild(newNotification);
+            }
+        };
+
+        notificationSocket.onclose = function(e) {
+            console.error('Notification socket closed unexpectedly');
+        };
+
+
+
+
+
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log("DOM fully loaded and parsed");
+
+            const chatInput = document.getElementById("chat-input-2");
+            const chatSendButton = document.getElementById("chat-send-2");
+            const chatBody = document.getElementById("chat-body-2");
+
+            function appendMessage(message, sender) {
+                const messageElement = document.createElement("div");
+                messageElement.classList.add("message", sender);
+                messageElement.textContent = message;
+                chatBody.appendChild(messageElement);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+
+            function fetchResponse(message, step, theme, difficulty) {
+                console.log(`Fetching response for message: ${message}, Step: ${step}, Theme: ${theme}, Difficulty: ${difficulty}`);
+
+                fetch("{% url 'chat_generate_problem' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Requested-With": "XMLHttpRequest",
+                        "X-CSRFToken": document.querySelector('input[name="csrfmiddlewaretoken"]').value
+                    },
+                    body: JSON.stringify({ message, step, theme, difficulty })
+                })
+                .then(response => {
+                    console.log(`Response status: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Received data:", data);
+                    if (data.error) {
+                        appendMessage(data.error, "bot");
+                    } else {
+                        appendMessage(data.question, "bot");
+                        if (data.choices && data.choices.length > 0) {
+                            data.choices.forEach(choice => {
+                                const choiceButton = document.createElement("button");
+                                choiceButton.textContent = choice[1];
+                                choiceButton.classList.add("choice-button", "btn"); // Added "btn" class for styling
+                                choiceButton.onclick = () => handleOptionClick(choice[0], step + 1, theme || choice[0], difficulty || choice[0]);
+                                chatBody.appendChild(choiceButton);
+                            });
+                        }
+                        if (data.problem_id) {
+                            const problemLink = document.createElement("a");
+                            problemLink.href = `/problem/${data.problem_id}/`; // Construct the URL using the problem_id
+                            problemLink.textContent = "Click here to view the problem";
+                            problemLink.classList.add("problem-link", "btn"); // Added "btn" class for styling
+                            chatBody.appendChild(problemLink);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching response:", error);
+                    appendMessage("An error occurred. Please try again.", "bot");
+                });
+            }
+
+            function handleOptionClick(message, step, theme, difficulty) {
+                appendMessage(message, "user");
+                fetchResponse(message, step, theme, difficulty);
+            }
+
+            // Initial bot message
+            appendMessage("Welcome! Let's generate a problem. What theme would you like to choose?", "bot");
+
+            // Add buttons for themes (Step 1)
+            const themes = [
+                {% for theme_code, theme_name in form.fields.theme.choices %}
+                ['{{ theme_code }}', '{{ theme_name }}'],
+                {% endfor %}
+            ];
+            themes.forEach(theme => {
+                const themeButton = document.createElement("button");
+                themeButton.textContent = theme[1];
+                themeButton.classList.add("choice-button", "btn"); // Added "btn" class for styling
+                themeButton.onclick = () => handleOptionClick(theme[0], 1, theme[0], null);
+                chatBody.appendChild(themeButton);
+            });
+        });
+    </script>
 </body>
 </html>

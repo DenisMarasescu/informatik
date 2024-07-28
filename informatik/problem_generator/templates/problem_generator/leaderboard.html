@@ -1,0 +1,92 @@
+<!-- leaderboard.html -->
+
+{% extends "problem_generator/base.html" %}
+
+{% block content %}
+
+<style>
+    .leaderboard-container {
+        width: 90%;
+        margin: 0 auto;
+        margin-top: 50px;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .leaderboard-container h1 {
+        text-align: center;
+        font-size: 2.5em;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .leaderboard-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 1.1em;
+    }
+
+    .leaderboard-table th, .leaderboard-table td {
+        padding: 12px 15px;
+        text-align: center;
+    }
+
+    .leaderboard-table thead th {
+        background-color: #007bff;
+        color: #ffffff;
+        text-transform: uppercase;
+        font-weight: bold;
+    }
+
+    .leaderboard-table tbody tr {
+        border-bottom: 1px solid #dddddd;
+    }
+
+    .leaderboard-table tbody tr:nth-of-type(even) {
+        background-color: #f3f3f3;
+    }
+
+    .leaderboard-table tbody tr:last-of-type {
+        border-bottom: 2px solid #007bff;
+    }
+
+    .leaderboard-table tbody tr:hover {
+        background-color: #f1f1f1;
+        cursor: pointer;
+    }
+
+    .leaderboard-table tbody td {
+        color: #555;
+    }
+</style>
+
+<div class="leaderboard-container">
+    <h1>Leaderboard</h1>
+    <table class="leaderboard-table">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>User</th>
+                <th>Problems Solved</th>
+                <th>Total Score</th>
+                <th>Average Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in leaderboard_data %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.total_solved }}</td>
+                <td>{{ user.total_score }}</td>
+                <td>{{ user.avg_score|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+

@@ -28,10 +28,22 @@ urlpatterns = [
     path('', views.landingPage, name="landingPage"),
 
     path('profile/', views.profile, name='profile'),
+    path('profile/edit/', views.edit_profile, name='edit_profile'),
+    path('profile/<str:username>/', views.view_profile, name='view_profile'),
+
 
     path('messages/<str:friend_username>/', views.get_past_messages, name='get_past_messages'),
 
+    path('ai-tutor/', views.ai_tutor, name='ai_tutor'),
 
+    path('leaderboard/', views.leaderboard, name='leaderboard'),
+
+
+    path('notifications/', views.get_notifications, name='get_notifications'),
+    path('notifications/mark_as_read/<int:notification_id>/', views.mark_notification_as_read, name='mark_notification_as_read'),
+    path('notifications/create/', views.CreateNotificationView.as_view(), name='create_notification'),
+
+    path('chat-generate-problem/', views.chat_generate_problem, name='chat_generate_problem'),
     # path('chat/<str:username>/', views.chat_detail, name='chat_detail'),
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
