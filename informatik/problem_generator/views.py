@@ -763,7 +763,7 @@ def ai_tutor(request):
         
         # Call your AI model here (using Groq)
         # client = Groq(api_key="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")
-        client = OpenAI(api_key="sk-proj-5LYdTeWDkM9LdeKs3zAHT3BlbkFJmSa6ZjHKoLX1KKiFuTgU")
+        client = OpenAI(api_key="sk-proj-eDURNSRDWPQ6QgWjeRDvT3BlbkFJJkgwiJ5eBx2xMeBfo6qZ")
         response = client.chat.completions.create(
             messages=[
                 {"role": "system", "content": "You are a romanian/english helpful informatics tutor. Your task is to provide easy to understand answers about programming in general. Anything outside of the programming field will not be answered to. Also, you will not give solving solutions to informatics problems if provided. The answer must be completly plain text and new lines marked with '\n'"},

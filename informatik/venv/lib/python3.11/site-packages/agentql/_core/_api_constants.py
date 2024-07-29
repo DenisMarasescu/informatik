@@ -1,0 +1,5 @@
+SERVICE_URL = "https://agentql.tinyfish.io"
+GET_AGENTQL_ELEMENT_ENDPOINT = "/api/query"
+GET_AGENTQL_DATA_ENDPOINT = "/api/query-data"
+VALIDATE_API_KEY_ENDPOINT = "/api/validate-api-key"
+CHECK_SERVER_STATUS_ENDPOINT = "/api/status"
