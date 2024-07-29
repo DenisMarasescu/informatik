@@ -311,12 +311,12 @@
                     <span class="material-icons nav-icon">code</span> Probleme
                 </a>
                 <a href="{% url 'profile' %}">
-                    <span class="material-icons nav-icon">person</span> Profile
+                    <span class="material-icons nav-icon">person</span> Profil
                 </a>
                 <a href="{% url 'leaderboard' %}">
-                    <span class="material-icons nav-icon">leaderboard</span> Leaderboard
+                    <span class="material-icons nav-icon">leaderboard</span> Clasament
                 </a>
-                <a href="{% url 'search_users' %}"><span class="material-icons nav-icon">group_add</span> Find friends</a>
+                <a href="{% url 'search_users' %}"><span class="material-icons nav-icon">group_add</span> Cauta prieteni</a>
             </nav>
         </div>
         <div class="postSide">
@@ -784,7 +784,7 @@ function addNotification(message, isUnread = false) {
                         if (data.problem_id) {
                             const problemLink = document.createElement("a");
                             problemLink.href = `/problem/${data.problem_id}/`; // Construct the URL using the problem_id
-                            problemLink.textContent = "Click here to view the problem";
+                            problemLink.textContent = "Apasa aici pentru a vedea problema";
                             problemLink.classList.add("problem-link", "btn"); // Added "btn" class for styling
                             chatBody.appendChild(problemLink);
                         }
@@ -802,7 +802,7 @@ function addNotification(message, isUnread = false) {
             }
 
             // Initial bot message
-            appendMessage("Welcome! Let's generate a problem. What theme would you like to choose?", "bot");
+            appendMessage("Bine ai venit! Hai să generăm o problemă. Ce temă ai dori să alegi?", "bot");
 
             // Add buttons for themes (Step 1)
             const themes = [

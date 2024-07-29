@@ -1,29 +1,201 @@
-{%load static%}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EvaluAI</title>
-    <link rel="stylesheet" href="{%static 'problem_generator/css/style.css'%}">
+    <link rel="stylesheet" href="{% static 'problem_generator/css/style.css' %}">
+    <style>
+        .landing {
+            display: flex;
+            gap: 2rem;
+            height: 85vh;
+            width: 100%;
+            box-sizing: border-box;
+            align-items: center;
+            padding: 0 10.5vw;
+            justify-content: space-between;
+            transition: var(--transition);
+            overflow: hidden;
+        }
+        
+        .landing img {
+            width: 36.5%;
+            height: auto;
+            animation: fadeInRight 1s ease-in-out;
+        }
+        
+        .landing .half {
+            animation: fadeInLeft 1s ease-in-out;
+        }
+        
+        .beneficiu {
+            display: grid;
+            width: 40%;
+            grid-template-columns: 30% 70%;
+            align-items: center;
+            animation: fadeInUp 1s ease-in-out;
+        }
+        
+        .contact img {
+            transform: translate(-3rem, -3rem); /* Move left by 3rem and up by 3rem */
+            animation: fadeInLeft 1s ease-in-out;
+        }
+        
+        .contact .half {
+            animation: fadeInRight 1s ease-in-out;
+        }
+
+        @keyframes fadeInLeft {
+            0% {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInRight {
+            0% {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media only screen and (max-width: 960px) {
+            .desktop {
+                display: none;
+            }
+            .mobile {
+                display: flex;
+                height: 100vh;
+                flex-direction: column;
+                align-items: center;
+                padding: 2rem 0.5rem;
+            }
+            
+            h1 {
+                font-size: 4rem !important;
+                align-self: flex-start;
+                margin-bottom: 2rem !important;
+            }
+            h4 {
+                font-size: 2rem;
+            }
+            .pasi {
+                align-self: flex-start;
+                padding-left: 0.2rem;
+                padding-right: 0.2rem;
+            }
+            
+            .step-text {
+                position: absolute;
+                left: 3.5rem;
+                top: 50%;
+                transform: translateY(-50%);
+                white-space: normal;
+                color: black;
+                width: 15rem;
+            }
+
+            .steps li {
+                counter-increment: step-counter;
+                width: 2rem;
+                height: 2rem;
+                line-height: 2rem;
+                border: 2px solid #466EB5;
+                border-radius: 50%;
+                text-align: center;
+                margin: 0 0 5rem 20px;
+                position: relative;
+                background-color: #466EB5;
+                color: white;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 1.5rem;
+            }
+            .steps li::before {
+                content: counter(step-counter);
+                font-weight: bold;
+            }
+            .steps li:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                left: 50%;
+                top: 100%;
+                width: 2px;
+                height: 5.2rem;
+                background-color: #466EB5;
+                transform: translateX(-50%);
+            }
+
+            #benficiimobil {
+                flex-direction: column;
+                width: 100%;
+                margin-bottom: 2.5rem;
+            }
+
+            .beneficii {
+                margin-top: 0.5rem;
+                align-items: center;
+                margin-bottom: 2.5rem;
+                padding: 0 0.2rem;
+            }
+
+            .beneficii h2 {
+                text-align: center;
+            }
+
+            .beneficiu {
+                width: 100%;
+            }
+
+            .beneficii h3 {
+                font-size: 1.5rem;
+            }
+
+            .beneficii p {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="desktop">
         <header>
             <h1 id="logo" class="colorGray">Evalu<span class="colorBlue">AI</span></h1>
             <div class="flexx">
-                <a href="{%url 'login'%}">Log In</a>
-                <a href="">/</a>
-                <a href="{%url 'register'%}">Sign up</a>
+                <a href="{% url 'login' %}">Log In</a>
+                <a href="#">/</a>
+                <a href="{% url 'register' %}">Sign up</a>
             </div>
         </header>
         <div class="landing">
             <div class="flexx col half">
                 <h1 class="titlu">Îmbunatateste-ti abilitatile in programare cu ajutorul AI</h1>
                 <p class="descriere">Platforma interactivă pentru elevi, alimentată de inteligență artificială, generează provocari digitale unice. Încurajează învățarea prin practică, oferind feedback instant și adaptând dificultatea la nivelul fiecărui utilizator.</p>
-                <a href="{%url 'login'%}" class="btnLand">Vreau să exersez</a>
+                <a href="{% url 'login' %}" class="btnLand">Vreau să exersez</a>
             </div>
-            <img src="{%static 'problem_generator/assets/laptopEvaluAI.png'%}" alt="">
+            <img src="{% static 'problem_generator/assets/laptopEvaluAI.png' %}" alt="Laptop EvaluAI" class="landing-img">
         </div>
         <div class="functionare">
             <h4>Cum funcționează</h4>
@@ -33,16 +205,13 @@
                     <li><div class="step-text2">Îți creezi contul pe platformă.</div></li>
                     <li><div class="step-text">Generezi probleme cu ajutorul AI.</div></li>
                     <li><div class="step-text2">AI-ul îți verifică răspunsul și vine cu sugestii.</div></li>
-                    <!-- Add more list items as needed -->
                 </ol>
-                
             </div>
         </div>
         <div class="beneficii">
             <h4>Beneficiile tale</h4>
             <h2>Folosind Evalu<span class="colorBlue">AI</span> beneficiezi în diferite moduri</h2>
-            
-            <div class="flexx spacebet" style="width: 90%; align-self: center   ;">
+            <div class="flexx spacebet" style="width: 90%; align-self: center;">
                 <div class="beneficiu">
                     <div class="icon">
                         <img src="{% static 'problem_generator/assets/simple.svg' %}" alt="Icon Description">
@@ -63,22 +232,22 @@
                 </div>
             </div>
         </div>
-
         <div class="contact">
             <div class="flexx col gap half">
-                <img src="{%static 'problem_generator/assets/mail.svg'%}" alt="">
+                <img src="{% static 'problem_generator/assets/mail.svg' %}" alt="Mail Icon" class="contact-img">
                 <div class="flexx col">
                     <h4>Nu ezita</h4>
                     <h2>Să ne adresezi mai multe întrebări</h2>
                 </div>
-            </div><div class="flexx col gap half align center">
+            </div>
+            <div class="flexx col gap half align center">
                 <form action="" class="flexx col" style="gap: 0.5rem;">
                     <div class="flexx" style="gap: 0.5rem;">
-                        <input type="text" name="nume" id="" placeholder="Nume">
-                        <input type="text" name="prenume" id="" placeholder="Prenume">
+                        <input type="text" name="nume" placeholder="Nume">
+                        <input type="text" name="prenume" placeholder="Prenume">
                     </div>
-                    <textarea name="Info" id="" cols="30" rows="8" placeholder="Ex: Cum functioneaza...."></textarea>
-                    <input type="button" name="submit" id="" class="btn" value="Afla mai multe" style="width: 100%;">
+                    <textarea name="Info" cols="30" rows="8" placeholder="Ex: Cum functioneaza...."></textarea>
+                    <input type="button" class="btn" value="Afla mai multe" style="width: 100%;">
                 </form>
             </div>
         </div>
@@ -95,16 +264,13 @@
                 <li><div class="step-text">Accesezi site-ul de pe computer.</div></li>
                 <li><div class="step-text">Iti faci cont pe platforma.</div></li>
                 <li><div class="step-text">Incepi sa rezolvi probleme.</div></li>
-                <!-- Add more list items as needed -->
                 <li><div class="step-text">Succes!</div></li>
             </ol>
-            
         </div>
         <div class="beneficii">
             <h4>Beneficiile tale</h4>
             <h2>Folosind Evalu<span class="colorBlue">AI</span> beneficiezi în diferite moduri</h2>
-            
-            <div class="flexx spacebet" style="width: 90%; align-self: center   ;" id="benficiimobil">
+            <div class="flexx spacebet" style="width: 90%; align-self: center;" id="benficiimobil">
                 <div class="beneficiu">
                     <div class="icon">
                         <img src="{% static 'problem_generator/assets/simple.svg' %}" alt="Icon Description">

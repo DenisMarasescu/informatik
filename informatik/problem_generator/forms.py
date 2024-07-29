@@ -33,21 +33,21 @@ class ProblemGenerationForm(forms.Form):
 
 class SingleDifficultyProblemGenerationForm(forms.Form):
     THEME_CHOICES = [
-        ('doubly_linked_lists', 'Doubly Linked Lists'),
-        ('searching_algorithms', 'Searching Algorithms'),
-        ('sorting_algorithms', 'Sorting Algorithms'),
-        ('graph_algorithms', 'Graph Algorithms'),
-        ('dynamic_programming', 'Dynamic Programming'),
-        ('recursion_backtracking', 'Recursion and Backtracking'),
-        ('data_structures', 'Data Structures'),
-        ('trees', 'Trees and Tree Algorithms'),
-        ('string_processing', 'String Processing'),
-        ('computational_geometry', 'Computational Geometry'),
+        ('doubly_linked_lists', 'Liste dublu înlănțuite'),
+        ('searching_algorithms', 'Algoritmi de căutare'),
+        ('sorting_algorithms', 'Algoritmi de sortare'),
+        ('graph_algorithms', 'Algoritmi pe grafuri'),
+        ('dynamic_programming', 'Programare dinamică'),
+        ('recursion_backtracking', 'Recursivitate și backtracking'),
+        ('data_structures', 'Structuri de date'),
+        ('trees', 'Arbori și algoritmi pe arbori'),
+        ('string_processing', 'Procesarea șirurilor'),
+        ('computational_geometry', 'Geometrie computațională'),
     ]
     DIFFICULTY_CHOICES = [
-        ('easy', 'Easy'),
-        ('medium', 'Medium'),
-        ('hard', 'Hard'),
+        ('easy', 'Usor'),
+        ('medium', 'Mediu'),
+        ('hard', 'Greu'),
     ]
     NUM_PROBLEMS_CHOICES = [(i, str(i)) for i in range(1, 11)]
 

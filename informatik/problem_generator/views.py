@@ -899,11 +899,11 @@ def chat_generate_problem(request):
 
         try:
             if step == 1:
-                question = "Great! Now choose a difficulty: easy, medium, or hard."
-                choices = [('easy', 'Easy'), ('medium', 'Medium'), ('hard', 'Hard')]
+                question = "Bun. Acum alege o dificultate: usor, mediu, greu"
+                choices = [('easy', 'Usor'), ('medium', 'Mediu'), ('hard', 'Greu')]
                 return JsonResponse({'question': question, 'choices': choices})
             elif step == 2:
-                question = f"Generating a {difficulty} difficulty problem for {theme}. Please wait..."
+                question = f"Se genereaza o problema de dificultate {difficulty} cu tema {theme}. Te rog sa astepti..."
                 choices = []
 
                 # Generate the problem here
@@ -950,7 +950,7 @@ def chat_generate_problem(request):
                     # Set index or homework if needed
                 )
 
-                return JsonResponse({'question': 'Problem generated successfully!', 'choices': [], 'problem_id': problem.id})
+                return JsonResponse({'question': 'Problema generata cu succes!', 'choices': [], 'problem_id': problem.id})
 
         except Exception as e:
             logger.error("Error in chat_generate_problem: %s", str(e), exc_info=True)
